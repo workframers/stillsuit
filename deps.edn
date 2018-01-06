@@ -1,0 +1,6 @@
+{:deps
+ {com.datomic/datomic-pro {:mvn/version "0.9.5656"}
+  org.clojure/tools.cli   {:mvn/version "0.3.5"}
+  mvxcvi/puget            {:mvn/version "1.0.2"}
+  com.taoensso/timbre     {:mvn/version "4.10.0"}
+  funcool/cuerdas         {:mvn/version "2.0.4"}}}
