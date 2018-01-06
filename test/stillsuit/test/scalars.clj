@@ -4,6 +4,11 @@
             [clojure.java.io :as io]
             [stillsuit.test-util.fixtures :as fixtures]))
 
+(use-fixtures :once fixtures/once)
+
 (deftest test-scalars
-  (testing "one and one"
-    (is (some? (fixtures/provision-db :rainbow)))))
+  (testing "load database"
+    (let [db     (fixtures/get-db :rainbow)
+          schema (fixtures/get-schema :rainbow)]
+      (is (some? db))
+      (is (map? schema)))))
