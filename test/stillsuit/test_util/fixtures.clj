@@ -6,14 +6,20 @@
 
 (def test-db-uri "datomic:mem://stillsuit-test")
 
-
 (defn provision-db
   [db-name]
-  (let [uri   test-db-uri
+  (let [uri      test-db-uri
         edn-path (format "resources/test-schemas/%s/datomic.edn" (name db-name))
         txes     (edn/load-edn-resource edn-path)]
-    (if-not (d/create-database test-db-uri)
-      (log/errorf "Couldn't create database %s!" test-db-uri))))
+    (if-not (d/create-database uri)
+      (log/errorf "Couldn't create database %s!" uri)
+      (let [conn  (d/connect uri)
+            after (-> conn
+                      (d/transact txes)
+                      deref
+                      :db-after)]
+        (log/debugf "Loaded %d transactions from %s" (count txes) (name db-name))
+        after))))
 
 ;(defn datomic-fork
 ;  "This fixture redefines datomic/get-connection so that it returns a forked version
