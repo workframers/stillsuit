@@ -1,14 +1,13 @@
 (ns stillsuit.core
   (:require [stillsuit.lacinia.core :as sl]
-            [stillsuit.datomic.core :as sd]
-            [datomic.api :as d]))
+            [stillsuit.lacinia.scalars :as ss]
+            [datomic.api :as d]
+            [com.walmartlabs.lacinia.schema :as schema]))
 
 (defn decorate
   ""
-  [base-schema-edn])
-
-
-(defn pull-star [db ref]
-  (d/q '[:find (pull ?r [*]) .
-         :in $ ?r]
-    db ref))
+  [base-schema-edn {:keys [:stillsuit/scalars :stillsuit/queries :stillsuit/compile?] :as options}]
+  (cond-> base-schema-edn
+    scalars (ss/attach-scalars options)
+    queries (sl/attach-queries queries)
+    compile? (schema/compile)))
