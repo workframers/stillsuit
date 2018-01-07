@@ -1,6 +1,7 @@
 (ns stillsuit.lacinia.scalars
   (:require [com.walmartlabs.lacinia.schema :as schema]
-            [clojure.edn :refer [read-string]])
+            [clojure.edn :refer [read-string]]
+            [clojure.tools.logging :as log])
   (:import (java.util Date UUID))
   (:refer-clojure :exclude [read-string]))
 

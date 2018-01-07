@@ -59,3 +59,7 @@
       (if (sd/entity? value)
         (get-graphql-value value field-name options)
         (get value field-name)))))
+
+
+(defn attach-queries [schema options]
+  schema)

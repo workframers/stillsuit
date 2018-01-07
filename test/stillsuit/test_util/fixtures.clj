@@ -3,7 +3,8 @@
             [datomock.core :as dm]
             [stillsuit.lib.edn :as edn]
             [clojure.tools.logging :as log]
-            [clojure.test :as test]))
+            [clojure.test :as test]
+            [stillsuit.core :as stillsuit]))
 
 (def test-db-uri "datomic:mem://stillsuit-test-")
 
@@ -56,6 +57,9 @@
 
 (defn get-db [db-name]
   (d/db (get-connection db-name)))
+
+(defn get-context [db-name]
+  (stillsuit/app-context nil (get-connection db-name)))
 
 (def once (test/join-fixtures [datomic-fixture]))
 
