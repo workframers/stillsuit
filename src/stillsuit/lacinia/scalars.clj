@@ -21,6 +21,7 @@
         (xform value)))))
 
 (def scalar-options
+  "Map from datomic db.type values to data for custom scalars"
   {:db.type/bigdec
    {::name      :JavaBigDec
     ::parse     (parse-val bigdec)
@@ -36,16 +37,6 @@
     ::parse     (parse-val long)
     ::serialize (schema/as-conformer str)
     ::description "A Java long value, serialized as a string (because it can be more than 32 bits)."}
-   :db.type/float
-   {::name      :JavaFloat
-    ::parse     (parse-val float)
-    ::serialize (schema/as-conformer str)
-    ::description "A Java float value, serialized as a string."}
-   :db.type/double
-   {::name        :JavaDouble
-    ::parse       (parse-val double)
-    ::serialize   (schema/as-conformer str)
-    ::description "A Java double value, serialized as a string."}
    :db.type/keyword
    {::name      :ClojureKeyword
     ::parse     (parse-val keyword)
@@ -61,10 +52,6 @@
     ::parse     (parse-val #(UUID/fromString (str %)))
     ::serialize (schema/as-conformer str)
     ::description "A java.util.UUID value, serialized as a string."}})
-
-(defn- attach-all
-  [schema]
-  schema)
 
 (defn attach-scalar [scalars db-type]
   (let [{:keys [::name ::parse ::serialize ::description]} (get scalar-options db-type)]

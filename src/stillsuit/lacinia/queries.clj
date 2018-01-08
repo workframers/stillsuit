@@ -51,6 +51,16 @@
     ;  (date-time-result value)
     value))
 
+(defn ref-resolver
+  [field-name]
+  ^resolve/ResolverResult
+  (fn [{:keys [:stillsuit/options]} args value]
+    (log/spy args value)
+    (resolve/resolve-as
+      (if (sd/entity? value)
+        (get-graphql-value value field-name options)
+        (get value field-name)))))
+
 (defn default-resolver
   [field-name]
   ^resolve/ResolverResult
@@ -59,6 +69,7 @@
       (if (sd/entity? value)
         (get-graphql-value value field-name options)
         (get value field-name)))))
+
 
 
 (defn attach-queries [schema options]

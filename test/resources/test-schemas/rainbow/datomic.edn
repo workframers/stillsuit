@@ -2,7 +2,7 @@
 ;; cf http://docs.datomic.com/schema.html#required-schema-attributes
 [[;; Schema
   {:db/ident       :rainbow/id
-   :db/valueType   :db.type/string
+   :db/valueType   :db.type/long
    :db/cardinality :db.cardinality/one
    :db/unique      :db.unique/identity}
   {:db/ident       :rainbow/one-keyword
@@ -46,15 +46,29 @@
    :db/cardinality :db.cardinality/one}]
  ;; Entities
  ;; No native URI or bytes EDN readers, afaict
- [{:rainbow/id          "rainbow"
+ [{:db/id               "one"
+   :rainbow/id          111
    :rainbow/one-keyword :my.keyword/value
-   :rainbow/one-string  "String value"
+   :rainbow/one-string  "One string"
    :rainbow/one-boolean true
-   :rainbow/one-long    49
-   :rainbow/one-bigint  321N
-   :rainbow/one-float   32.45
-   :rainbow/one-double  32.45
+   :rainbow/one-long    149
+   :rainbow/one-bigint  1321N
+   :rainbow/one-float   132.45
+   :rainbow/one-double  132.45
    :rainbow/one-bigdec  123.45M
-   :rainbow/one-instant #inst "2018-01-06T16:48:13Z"
-   :rainbow/one-uuid    #uuid "fcc81e3e-f301-11e7-8a4d-4762cfbddccf"}]]
-   ;:rainbow/one-uri     #java.net.URI["https://clojure.org"]}]]
+   :rainbow/one-instant #inst "2018-01-01T16:48:13Z"
+   :rainbow/one-uuid    #uuid "fcc81e3e-f301-11e7-8a4d-4762cfbddccf"
+   :rainbow/one-ref     "two"}
+  {:db/id               "two"
+   :rainbow/id          222
+   :rainbow/one-keyword :my.keyword/value
+   :rainbow/one-string  "Two string"
+   :rainbow/one-boolean true
+   :rainbow/one-long    249
+   :rainbow/one-bigint  2321N
+   :rainbow/one-float   232.45
+   :rainbow/one-double  232.45
+   :rainbow/one-bigdec  223.45M
+   :rainbow/one-instant #inst "2018-02-02T16:48:13Z"
+   :rainbow/one-uuid    #uuid "796ddd5e-f3b4-11e7-82d5-0747e98878c6"}]]
+;:rainbow/one-uri     #java.net.URI["https://clojure.org"]}]]

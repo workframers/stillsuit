@@ -18,8 +18,11 @@
 (defn decorate
   ""
   [base-schema-edn {:keys [:stillsuit/scalars :stillsuit/queries :stillsuit/compile?] :as options}]
-  (cond-> base-schema-edn
-    scalars  (ss/attach-scalars options)
-    queries  (sq/attach-queries queries)
-    ;true     (log/spy)
-    compile? (schema/compile)))
+  (let [uncompiled (cond-> base-schema-edn
+                     scalars  (ss/attach-scalars options)
+                     queries  (sq/attach-queries queries))]
+    (when (:stillsuit/trace? options)
+      (log/spy :trace uncompiled))
+    (if compile?
+      (schema/compile uncompiled {:default-field-resolver sq/default-resolver})
+      uncompiled)))
