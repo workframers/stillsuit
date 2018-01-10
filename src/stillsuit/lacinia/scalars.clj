@@ -62,9 +62,9 @@
   (assoc schema :scalars (reduce attach-scalar (:scalars schema) overrides)))
 
 (defn attach-scalars
-  [schema {:keys [:stillsuit/scalars] :as options}]
+  [schema {:keys [:stillsuit/scalars] :as config}]
   (cond-> schema
-    (not (:stillsuit.scalar/skip-defaults? scalars))
+    (not (:stillsuit.scalar/skip-defaults? config))
     (attach-overrides (-> scalar-options keys set))
 
     (set? (:stillsuit.scalar/for-fields scalars))
