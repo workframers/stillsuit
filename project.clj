@@ -6,14 +6,14 @@
             :url  "http://www.eclipse.org/legal/epl-v10.html"}
 
   :dependencies [[org.clojure/clojure "1.9.0"]
-                 [org.clojure/core.async "0.3.465"]
+                 [org.clojure/core.async "0.4.474"]
                  [org.clojure/tools.cli "0.3.5"]
                  [mvxcvi/puget "1.0.2"]
                  [fipp "0.6.12"]
-                 [funcool/cuerdas "2.0.4"]
+                 [funcool/cuerdas "2.0.5"]
                  [aero "1.1.2"]
                  [io.aviso/pretty "0.1.34"]
-                 [com.walmartlabs/lacinia "0.24.0-rc-1"]
+                 [com.walmartlabs/lacinia "0.24.0-rc-2"]
                  [com.datomic/datomic-pro "0.9.5656"]
                  [clojure.java-time "0.3.1"]
                  [org.clojure/tools.logging "0.4.0"]
