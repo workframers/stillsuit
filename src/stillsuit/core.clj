@@ -9,8 +9,10 @@
 
 (defn app-context
   "Return an app-context map suitable for handing to (lacinia/execute-query)."
-  ([{:keys [:stillsuit/datomic-uri] :as options}]
-   (app-context options (d/connect datomic-uri)))
+  ([options]
+   (let [datomic-uri (or (:stillsuit/datomic-uri options) (:catchpocket/datomic-uri options))]
+     (log/debugf "Connecting to datomic at %s..." datomic-uri)
+     (app-context options (d/connect datomic-uri))))
   ([options conn]
    (app-context options conn (d/db conn)))
   ([options conn db]

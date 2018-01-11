@@ -61,17 +61,11 @@
 (defn resolver-map [config]
   {})
 
-(defn datomic-entity-interface [config]
-  {:description "Base type for datomic entities"
-   :fields {:db_id {:type        'ID
-                    :description "The entity's EID (as a string)"}}})
-
-(defn datomic-entity-interface [config]
-  {:description "Base type for datomic entities"
-   :fields {:db_id {:type        'ID
-                    :description "The entity's EID (as a string)"}}})
-
-
+(defn datomic-entity-interface [{:keys [] :as config}]
+  (let [db-id (:stillsuit/db-id-name config :dbId)]
+    {:description "Base type for datomic entities"
+     :fields {db-id  {:type        'ID
+                      :description "The entity's EID (as a string)"}}}))
 
 (defn attach-resolvers [schema config]
   (let [entity-type (:stillsuit/datomic-entity-type config)]
