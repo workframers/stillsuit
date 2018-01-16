@@ -44,7 +44,7 @@
     (let [{:attribute/keys [ident field-type]} attr-info
           arg    (-> args vals first)
           result (datomic/get-entity-by-unique-attribute db ident arg)]
-      (log/spy [arg ident field-type result])
+      ;(log/spy [arg ident field-type result])
       (resolve/resolve-as
        (schema/tag-with-type result return-type)))))
 

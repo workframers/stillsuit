@@ -4,7 +4,8 @@
             [clojure.tools.logging :as log]
             [cuerdas.core :as str]
             [datomic.api :as d]
-            [stillsuit.datomic.core :as datomic]))
+            [stillsuit.datomic.core :as datomic]
+            [com.walmartlabs.lacinia.schema :as schema]))
 
 (defn graphql-field->datomic-attribute
   "Given a datomic entity and a field name from GraphQL, try to look up the field name in
@@ -28,30 +29,28 @@
   [entity graphql-field-name options]
   (let [attr-kw (graphql-field->datomic-attribute entity graphql-field-name options)
         value   (get entity attr-kw)]
-    (log/spy [entity graphql-field-name attr-kw value])
+    ;(log/spy [entity graphql-field-name attr-kw value])
     (log/tracef "Resolved graphql field '%s' as %s, value %s" graphql-field-name attr-kw value)
     ;(if (instance? java.util.Date value)
     ;  (date-time-result value)
     value))
 
 (defn ref-resolver
-  [field-name]
+  "Resolver used to get a literal attribute value out of an entity, eg in
+  :resolve [:stillsuit-entity-attribute :artist/_country]"
+  [datomic-attribute return-type]
   ^resolve/ResolverResult
-  (fn [{:keys [:stillsuit/options]} args value]
-    (log/spy args value)
-    (resolve/resolve-as
-     (if (sd/entity? value)
-       (get-graphql-value value field-name options)
-       (get value field-name)))))
+  (fn [{:keys [:stillsuit/options]} args entity]
+    (let [value (get entity datomic-attribute)]
+      (resolve/resolve-as
+       (schema/tag-with-type value return-type)))))
 
-(defn resolver-map [config]
-  {})
-
-(defn datomic-entity-interface [{:keys [] :as config}]
+(defn datomic-entity-interface
+  [config]
   (let [db-id (:stillsuit/db-id-name config :dbId)]
     {:description "Base type for datomic entities"
-     :fields {db-id  {:type        'ID
-                      :description "The entity's EID (as a string)"}}}))
+     :fields      {db-id {:type        'ID
+                          :description "The entity's EID (as a string)"}}}))
 
 (defn attach-resolvers [schema config]
   (let [entity-type (:stillsuit/datomic-entity-type config)]
@@ -66,3 +65,7 @@
      (if (sd/entity? value)
        (get-graphql-value value field-name options)
        (get value field-name)))))
+
+(defn resolver-map [config]
+  {:stillsuit.entity-attribute ref-resolver})
+

@@ -51,7 +51,6 @@
                    (let [attr-ent (d/entity db attr-kw)]
                      (when (some? (:db/unique attr-ent))
                        attr-kw)))]
-      (log/spy (keys entity))
       (some->> entity
                keys
                (remove #(= (namespace %) "db"))
