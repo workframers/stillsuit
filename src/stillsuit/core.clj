@@ -16,12 +16,14 @@
   ([options conn]
    (app-context options conn (d/db conn)))
   ([options conn db]
-   {:stillsuit/conn conn
-    :stillsuit/db   db}))
+   {:stillsuit/conn    conn
+    :stillsuit/options options
+    :stillsuit/db      db}))
 
 (def default-options
-  {:stillsuit/datomic-entity-type  :DatomicEntity
-   :stillsuit/entity-id-query-name :entity_by_eid})
+  {:stillsuit/datomic-entity-type     :DatomicEntity
+   :stillsuit/entity-id-query-name    :entity_by_eid
+   :stillsuit/query-by-unique-id-name :entity_by_unique_id})
 
 (defn decorate-resolver-map
   ([resolver-map]

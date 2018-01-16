@@ -3,22 +3,8 @@
             [com.walmartlabs.lacinia.resolve :as resolve]
             [clojure.tools.logging :as log]
             [cuerdas.core :as str]
-            [datomic.api :as d]))
-
-(defn guess-entity-ns
-  "Given a random entity, iterate through its attributes and look for one that is marked
-  as :db.unique/identity. Return the namespace of that attribute as a string."
-  [entity]
-  (when entity
-    (let [db     (d/entity-db entity)
-          unique (fn [attr-kw]
-                   (let [attr-ent (d/entity db attr-kw)]
-                     (when (= :db.unique/identity (:db/unique attr-ent))
-                       attr-kw)))]
-      (some->> entity
-               keys
-               (some unique)
-               namespace))))
+            [datomic.api :as d]
+            [stillsuit.datomic.core :as datomic]))
 
 (defn graphql-field->datomic-attribute
   "Given a datomic entity and a field name from GraphQL, try to look up the field name in
@@ -30,11 +16,10 @@
     :db/id
 
     :else
-    (let [entity-ns (guess-entity-ns entity)
+    (let [entity-ns (datomic/guess-entity-ns entity)
           xform     (:stillsuit/ns-to-str options str/kebab)
           entity-kw (xform graphql-field-name)]
       (keyword entity-ns entity-kw))))
-
 
 (defn get-graphql-value
   "Given a datomic entity and a field name from GraphQL, try to look up the field name in
@@ -43,6 +28,7 @@
   [entity graphql-field-name options]
   (let [attr-kw (graphql-field->datomic-attribute entity graphql-field-name options)
         value   (get entity attr-kw)]
+    (log/spy [entity graphql-field-name attr-kw value])
     (log/tracef "Resolved graphql field '%s' as %s, value %s" graphql-field-name attr-kw value)
     ;(if (instance? java.util.Date value)
     ;  (date-time-result value)
@@ -80,4 +66,3 @@
      (if (sd/entity? value)
        (get-graphql-value value field-name options)
        (get value field-name)))))
-
