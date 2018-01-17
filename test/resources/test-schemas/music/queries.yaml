@@ -1,0 +1,12 @@
+# I don't love yaml, but it's a little easier to format queries in here than in Clojure source
+# Use this file by calling (get-queries :basic)
+queries:
+  basic: |-
+    {
+      inkvine_now_utc {
+        epoch
+        epochMilliseconds
+        toString
+        isLeapYear
+      }
+    }

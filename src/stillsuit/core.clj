@@ -44,6 +44,7 @@
                        (sr/attach-resolvers opts))]
     (when (:stillsuit/trace? opts)
       (log/spy :trace uncompiled))
+    (log/spy (decorate-resolver-map {}))
     (if compile?
       (let [with-resolvers (util/attach-resolvers uncompiled (decorate-resolver-map {}))]
         (schema/compile with-resolvers {:default-field-resolver sr/default-resolver}))

@@ -1,0 +1,50 @@
+{
+
+ ;; Manual schema for rainbow
+ ;{:db/id               "two"
+ ; :rainbow/id          222
+ ; :rainbow/one-keyword :my.keyword/value
+ ; :rainbow/one-string  "String value"
+ ; :rainbow/one-boolean true
+ ; :rainbow/one-long    249
+ ; :rainbow/one-bigint  2321N
+ ; :rainbow/one-float   232.45
+ ; :rainbow/one-double  232.45
+ ; :rainbow/one-bigdec  223.45M
+ ; :rainbow/one-instant #inst "2018-02-02T16:48:13Z"
+ ; :rainbow/one-uuid    #uuid "796ddd5e-f3b4-11e7-82d5-0747e98878c6"}}
+
+
+ :objects
+ {:Rainbow
+  {:description "I've got one of everything"
+   :fields      {:id         {:type ID}
+                 :oneString  {:type String}
+                 :oneKeyword {:type :ClojureKeyword}
+                 :oneBoolean {:type Boolean}
+                 :oneLong    {:type :JavaLong}
+                 :oneBigint  {:type :JavaBigInt}
+                 :oneFloat   {:type :JavaFloat}
+                 :oneDouble  {:type :JavaDouble}
+                 :oneBigdec  {:type :JavaBigDec}
+                 :oneInstant {:type :JavaDate}
+                 :oneUuid    {:type :JavaUUID}
+                 :oneRef     {:type :Rainbow}}}}
+ :queries
+ {:rainbowById
+  {:type        :Rainbow
+   :description "Get a rainbow by ID"
+   :args        {:id {:type ID}}
+   :resolve     :query/rainbow-by-id}}
+
+ :mutations
+ {:echo
+  {:type        :Rainbow
+   :description "Return input"
+   :args        {:keyword {:type :ClojureKeyword}
+                 :uuid    {:type :JavaUUID}
+                 :date    {:type :JavaDate}
+                 :bigdec  {:type :JavaBigDec}
+                 :bigint  {:type :JavaBigInt}}
+   :resolve     :mutation/echo}}}
+

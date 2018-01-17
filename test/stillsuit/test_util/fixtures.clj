@@ -4,11 +4,14 @@
             [stillsuit.lib.edn :as edn]
             [clojure.tools.logging :as log]
             [clojure.test :as test]
-            [stillsuit.core :as stillsuit]))
+            [stillsuit.core :as stillsuit]
+            [com.walmartlabs.lacinia.util :as util]
+            [yaml.core :as yaml]
+            [clojure.java.io :as io]))
 
 (def test-db-uri "datomic:mem://stillsuit-test-")
 
-(def all-db-names [:rainbow])
+(def all-db-names [:rainbow :music])
 
 (def ^:private db-store (atom {}))
 
@@ -60,6 +63,29 @@
 
 (defn get-context [db-name]
   (stillsuit/app-context nil (get-connection db-name)))
+
+(defn- get-queries
+  [db-name]
+  (->> db-name
+       name
+       (format "resources/test-schemas/%s/queries.yaml")
+       io/resource
+       io/reader
+       slurp
+       yaml/parse-string
+       :queries))
+
+(defn load-setup
+  "Return a tuple [app-context resolver-map compiled-schema]"
+  [db-name resolver-map]
+  (let [ctx      (get-context db-name)
+        schema   (get-schema db-name)
+        queries  (get-queries db-name)
+        options  {:stillsuit/compile? true}
+        compiled (stillsuit/decorate schema options)]
+    {::context ctx
+     ::schema  compiled
+     ::queries queries}))
 
 (def once (test/join-fixtures [datomic-fixture]))
 

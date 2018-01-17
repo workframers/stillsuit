@@ -30,4 +30,5 @@
                                    ;[venantius/ultra "0.5.2" :exclusions [org.clojure/clojure]]
                                    [com.jakemccrary/lein-test-refresh "0.22.0"]]
                     :dependencies [[vvvvalvalval/datomock "0.2.0"]]}
-             :test {:resource-paths ["test/resources"]}})
+             :test {:resource-paths ["test/resources"]
+                    :dependencies [[io.forward/yaml "1.0.6"]]}})

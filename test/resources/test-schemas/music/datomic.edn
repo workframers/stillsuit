@@ -1,0 +1,102 @@
+;; Stripped-down album / artist / track model for tests
+;; cf http://docs.datomic.com/schema.html#required-schema-attributes
+[[;; Schema - artist
+  {:db/ident       :artist/id
+   :db/valueType   :db.type/long
+   :db/cardinality :db.cardinality/one
+   :db/unique      :db.unique/identity}
+  {:db/ident       :artist/name
+   :db/valueType   :db.type/string
+   :db/cardinality :db.cardinality/one}
+  {:db/ident       :artist/albums
+   :db/valueType   :db.type/ref
+   :db/cardinality :db.cardinality/many}
+  ;; Album
+  {:db/ident       :album/id
+   :db/valueType   :db.type/long
+   :db/cardinality :db.cardinality/one
+   :db/unique      :db.unique/identity}
+  {:db/ident       :album/name
+   :db/valueType   :db.type/string
+   :db/cardinality :db.cardinality/one}
+  {:db/ident       :album/year
+   :db/valueType   :db.type/long
+   :db/cardinality :db.cardinality/one}
+  {:db/ident       :album/tracks
+   :db/valueType   :db.type/ref
+   :db/cardinality :db.cardinality/many
+   :db/isComponent true}
+  ;; Track
+  {:db/ident       :track/id
+   :db/valueType   :db.type/long
+   :db/cardinality :db.cardinality/one
+   :db/unique      :db.unique/identity}
+  {:db/ident       :track/name
+   :db/valueType   :db.type/string
+   :db/cardinality :db.cardinality/one}
+  {:db/ident       :track/position
+   :db/valueType   :db.type/long
+   :db/cardinality :db.cardinality/many}]
+ ;; Entities
+ [{:db/id       "crass"
+   :artist/id   1
+   :artist/name "Crass"}
+  {:db/id          "feeding"
+   :album/id       2
+   :album/name     "The Feeding Of The 5000"
+   :album/year     1977
+   :artist/_albums "crass"}
+   ;:album/tracks   #{"feeding1" "feeding2" "feeding3"}}
+  {:db/id          "feeding1"
+   :track/id       3
+   :track/name     "Asylum"
+   :track/position 1
+   :album/_tracks  "feeding"}
+  {:db/id          "feeding2"
+   :track/id       4
+   :track/name     "Do They Owe Us a Living?"
+   :track/position 2
+   :album/_tracks  "feeding"}
+  {:db/id          "feeding3"
+   :track/id       5
+   :track/name     "End Result"
+   :track/position 3
+   :album/_tracks  "feeding"}
+  {:db/id          "stations"
+   :album/id       6
+   :album/name     "Stations of the Crass"
+   :album/year     1977
+   :artist/_albums "crass"}
+  {:db/id          "stations1"
+   :track/id       7
+   :track/name     "Mother-Earth"
+   :track/position 1
+   :album/_tracks  "stations"}
+  {:db/id          "stations2"
+   :track/id       8
+   :track/name     "White Punks on Hope"
+   :track/position 2
+   :album/_tracks  "stations"}
+  {:db/id          "stations3"
+   :track/id       9
+   :track/name     "You've Got Big Hands"
+   :track/position 3
+   :album/_tracks  "stations"}
+  {:db/id       "subhumans"
+   :artist/id   10
+   :artist/name "Subhumans"}
+  {:db/id          "day"
+   :album/id       11
+   :album/name     "The Day the Country Died"
+   :album/year     1983
+   :artist/_albums "subhumans"}
+  {:db/id          "day1"
+   :track/id       12
+   :track/name     "All Gone Dead"
+   :track/position 1
+   :album/_tracks  "day"}
+  {:db/id          "day2"
+   :track/id       13
+   :track/name     "Ashtray Dirt"
+   :track/position 2
+   :album/_tracks  "day"}]]
