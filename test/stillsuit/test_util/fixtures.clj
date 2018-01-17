@@ -55,6 +55,16 @@
   (test-fn)
   (teardown-datomic))
 
+(defn catch-fixture [test-fn]
+  (try
+    (test-fn)
+    (catch Exception e
+      (log/warn "whoops!")
+      (when-let [exdata (ex-data e)]
+        (log/spy :warn exdata))
+      (throw e))))
+
+
 (defn get-connection [db-name]
   (get @db-store db-name))
 
@@ -82,12 +92,13 @@
         schema   (get-schema db-name)
         queries  (get-queries db-name)
         options  {:stillsuit/compile? true}
-        compiled (stillsuit/decorate schema options)]
+        compiled (stillsuit/decorate schema options resolver-map)]
     {::context ctx
      ::schema  compiled
      ::queries queries}))
 
 (def once (test/join-fixtures [datomic-fixture]))
+(def each (test/join-fixtures [catch-fixture]))
 
 ;(defn datomic-fork
 ;  "This fixture redefines datomic/get-connection so that it returns a forked version

@@ -3,10 +3,8 @@
 queries:
   basic: |-
     {
-      inkvine_now_utc {
-        epoch
-        epochMilliseconds
-        toString
-        isLeapYear
+      all_artists {
+        name
+        id
       }
     }

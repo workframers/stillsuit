@@ -8,6 +8,7 @@
             [datomic.api :as d]))
 
 (use-fixtures :once fixtures/once)
+(use-fixtures :each fixtures/each)
 
 (defn- rainbow-by-id [{:keys [:stillsuit/db]} {:keys [id]} _]
   (let [num (-> id read-string long)]

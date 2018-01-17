@@ -36,16 +36,17 @@
 
 (defn decorate
   ""
-  [base-schema-edn {:keys [:stillsuit/scalars :stillsuit/compile?] :as config}]
-  (let [opts       (merge default-options config)
-        uncompiled (-> base-schema-edn
-                       (ss/attach-scalars opts)
-                       (sq/attach-queries opts)
-                       (sr/attach-resolvers opts))]
-    (when (:stillsuit/trace? opts)
-      (log/spy :trace uncompiled))
-    (log/spy (decorate-resolver-map {}))
-    (if compile?
-      (let [with-resolvers (util/attach-resolvers uncompiled (decorate-resolver-map {}))]
-        (schema/compile with-resolvers {:default-field-resolver sr/default-resolver}))
-      uncompiled)))
+  ([base-schema-edn config]
+   (decorate base-schema-edn config {}))
+  ([base-schema-edn {:keys [:stillsuit/scalars :stillsuit/compile?] :as config} resolver-map]
+   (let [opts       (merge default-options config)
+         uncompiled (-> base-schema-edn
+                        (ss/attach-scalars opts)
+                        (sq/attach-queries opts)
+                        (sr/attach-resolvers opts))]
+     (when (:stillsuit/trace? opts)
+       (log/spy :trace uncompiled))
+     (if compile?
+       (let [with-resolvers (util/attach-resolvers uncompiled (decorate-resolver-map resolver-map))]
+         (schema/compile with-resolvers {:default-field-resolver sr/default-resolver}))
+       uncompiled))))
