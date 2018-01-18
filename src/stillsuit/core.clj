@@ -20,16 +20,18 @@
     :stillsuit/options options
     :stillsuit/db      db}))
 
-(def default-options
+(def default-config
   {:stillsuit/datomic-entity-type     :DatomicEntity
    :stillsuit/entity-id-query-name    :entity_by_eid
-   :stillsuit/query-by-unique-id-name :entity_by_unique_id})
+   :stillsuit/query-by-unique-id-name :entity_by_unique_id
+   :stillsuit/no-default-resolver?    false
+   :stillsuit/compile?                true})
 
 (defn decorate-resolver-map
   ([resolver-map]
    (decorate-resolver-map resolver-map nil))
   ([resolver-map options]
-   (let [with-defaults (merge default-options options)]
+   (let [with-defaults (merge default-config options)]
      (merge resolver-map
             (sr/resolver-map with-defaults)
             (sq/resolver-map with-defaults)))))
@@ -38,15 +40,17 @@
   ""
   ([base-schema-edn config]
    (decorate base-schema-edn config {}))
-  ([base-schema-edn {:keys [:stillsuit/scalars :stillsuit/compile?] :as config} resolver-map]
-   (let [opts       (merge default-options config)
-         uncompiled (-> base-schema-edn
-                        (ss/attach-scalars opts)
-                        (sq/attach-queries opts)
-                        (sr/attach-resolvers opts))]
+  ([base-schema-edn config resolver-map]
+   (let [opts         (merge default-config config)
+         uncompiled   (-> base-schema-edn
+                          (ss/attach-scalars opts)
+                          (sq/attach-queries opts)
+                          (sr/attach-resolvers opts))
+         compile-opts (when-not (:stillsuit/no-default-resolver? opts)
+                        {:default-field-resolver sr/default-resolver})]
      (when (:stillsuit/trace? opts)
        (log/spy :trace uncompiled))
-     (if compile?
+     (if (:stillsuit/compile? opts)
        (let [with-resolvers (util/attach-resolvers uncompiled (decorate-resolver-map resolver-map))]
-         (schema/compile with-resolvers {:default-field-resolver sr/default-resolver}))
+         (schema/compile with-resolvers compile-opts))
        uncompiled))))

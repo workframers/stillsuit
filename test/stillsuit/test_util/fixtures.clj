@@ -1,17 +1,14 @@
 (ns stillsuit.test-util.fixtures
   (:require [datomic.api :as d]
             [clojure.test :refer [testing is]]
-            [stillsuit.lib.edn :as sle]
+            [stillsuit.lib.util :as util]
             [clojure.tools.logging :as log]
             [clojure.test :as test]
             [stillsuit.core :as stillsuit]
-            [com.walmartlabs.lacinia.util :as util]
             [yaml.core :as yaml]
             [clojure.java.io :as io]
             [com.walmartlabs.lacinia :as lacinia]
-            [clojure.tools.reader.edn :as edn]
-            [clojure.walk :as walk])
-  (:import (clojure.lang IPersistentMap)))
+            [clojure.tools.reader.edn :as edn]))
 
 (def test-db-uri "datomic:mem://stillsuit-test-")
 
@@ -19,12 +16,12 @@
 
 (def ^:private db-store (atom {}))
 
-(defn provision-db
+(defn- provision-db
   [db-name]
   (let [db-str (name db-name)
         uri    (str test-db-uri db-str)
         path   (format "resources/test-schemas/%s/datomic.edn" db-str)
-        txes   (sle/load-edn-resource path)]
+        txes   (util/load-edn-resource path)]
     (if-not (d/create-database uri)
       (log/errorf "Couldn't create database %s!" uri)
       (let [conn (d/connect uri)]
@@ -33,22 +30,26 @@
         (log/debugf "Loaded %d transactions from %s" (count txes) db-str)
         conn))))
 
-(defn get-schema
+(defn- get-schema
   [db-name]
   (->> db-name
        name
        (format "resources/test-schemas/%s/lacinia.edn")
-       sle/load-edn-resource))
+       util/load-edn-resource))
 
-(defn get-db [name]
-  (provision-db name))
+(defn- get-config
+  [db-name]
+  (->> db-name
+       name
+       (format "resources/test-schemas/%s/stillsuit.edn")
+       util/load-edn-resource))
 
-(defn setup-datomic []
+(defn- setup-datomic []
   (doseq [db-name all-db-names
           :let [conn (provision-db db-name)]]
     (swap! db-store assoc db-name conn)))
 
-(defn teardown-datomic []
+(defn- teardown-datomic []
   (doseq [db-name all-db-names]
     (d/delete-database (str test-db-uri (name db-name)))
     (log/debugf "Deleted database %s" (name db-name))
@@ -68,14 +69,13 @@
         (log/spy :warn exdata))
       (throw e))))
 
-
-(defn get-connection [db-name]
+(defn- get-connection [db-name]
   (get @db-store db-name))
 
-(defn get-db [db-name]
+(defn- get-db [db-name]
   (d/db (get-connection db-name)))
 
-(defn get-context [db-name]
+(defn- get-context [db-name]
   (stillsuit/app-context nil (get-connection db-name)))
 
 (defn- get-query-doc
@@ -91,31 +91,15 @@
 (defn load-setup
   "Return a tuple [app-context resolver-map compiled-schema]"
   [db-name resolver-map]
-  (let [ctx      (get-context db-name)
+  (let [config   (get-config db-name)
+        context  (get-context db-name)
         schema   (get-schema db-name)
         queries  (get-query-doc db-name)
-        options  {:stillsuit/compile? true}
-        compiled (stillsuit/decorate schema options resolver-map)]
-    {::context   ctx
+        compiled (stillsuit/decorate schema config resolver-map)]
+    {::context   context
+     ::config    config
      ::schema    compiled
      ::query-doc queries}))
-
-(defn simplify
-  "Converts all ordered maps nested within the map into standard hash maps, and
-   sequences into vectors, which makes for easier constants in the tests, and eliminates ordering problems."
-  [m]
-  (walk/postwalk
-   (fn [node]
-     (cond
-       (instance? IPersistentMap node)
-       (into {} node)
-
-       (seq? node)
-       (vec node)
-
-       :else
-       node))
-   m))
 
 (defn execute-query
   "Given a setup map as returned by (load-setup), execute the query defined in the associated YAML"
@@ -137,7 +121,7 @@
             :let [expected (edn/read-string response-str)]]
       (testing (str qname)
         (let [result     (execute-query setup qname)
-              simplified (simplify result)]
+              simplified (util/simplify result)]
           (is (= expected simplified)))))))
 
 (def once (test/join-fixtures [datomic-fixture]))

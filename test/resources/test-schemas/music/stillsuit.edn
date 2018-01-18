@@ -1,0 +1,2 @@
+;; This file contains stillsuit options which are passed to (stillsuit.core/decorate)
+{}

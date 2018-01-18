@@ -1,23 +1,19 @@
 (ns stillsuit.test.resolvers
   (:require [clojure.test :refer :all]
             [stillsuit.test-util.fixtures :as fixtures]
-            [com.walmartlabs.lacinia :as lacinia]
             [clojure.tools.logging :as log]
-            [com.walmartlabs.lacinia.util :as util]
-            [com.walmartlabs.lacinia.schema :as schema]
-            [datomic.api :as d]
-            [clojure.tools.reader.edn :as edn]))
+            [datomic.api :as d]))
 
 (use-fixtures :once fixtures/once)
 (use-fixtures :each fixtures/each)
 
 (defn- get-artist-by-id
   [{:stillsuit/keys [db]} {:keys [id]} v]
-  (some->> (d/q '[:find [?a ...]
+  (some->> (d/q '[:find ?a .
+                  :in $ ?id
                   :where [?a :artist/id ?id]]
-                db id)
-           (map (partial d/entity db))
-           (sort-by :artist/name)))
+                db (Long/parseLong id))
+    (d/entity db)))
 
 (defn- get-all-artists
   [{:stillsuit/keys [db]} {:keys [id]} v]

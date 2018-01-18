@@ -22,17 +22,6 @@
 (def resolver-map {:mutation/echo       echo-rainbow
                    :query/rainbow-by-id rainbow-by-id})
 
-(defn setup [resolvers]
-  (let [schema   (fixtures/get-schema :rainbow)
-        context  (fixtures/get-context :rainbow)
-        _ (log/spy resolvers)
-        compiled (-> schema
-                     (util/attach-resolvers resolvers)
-                     (stillsuit/decorate {:stillsuit/scalars  :all
-                                          :stillsuit/entity   :true
-                                          :stillsuit/compile? true}))]
-    [compiled context]))
-
 ; hrm, compile troubles
 ;(deftest test-scalars-outbound
 ;  (testing "load database"

@@ -14,9 +14,11 @@
   {:description "Track"
    :fields      {:id   {:type (non-null ID)}
                  :name {:type (non-null String)}}}}
+
+ ;; Corresponding resolvers are defined in stillsuit.test.resolvers
  :queries
  {:artist_by_id
-  {:type        (list (non-null :Artist))
+  {:type        :Artist
    :description "Get an artist by ID"
    :args        {:id {:type ID}}
    :resolve     :query/artist-by-id}

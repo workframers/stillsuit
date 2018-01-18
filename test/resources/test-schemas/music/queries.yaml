@@ -1,5 +1,8 @@
-# I don't love yaml, but it's a little easier to format queries in here than in Clojure source
-# Use this file by calling (get-queries :basic)
+# I don't love yaml, but it's a little easier to format GraphQL in here than in Clojure source
+# This file contains some test queries that can be accessed by the (load-setup) and
+# (execute-query) test routines. If a query has an associated :response key, that will
+# be parsed as EDN and compared to the actual query output via the (verify-queries!)
+# test function.
 all_artists:
   query: |-
     {
@@ -13,4 +16,28 @@ all_artists:
      {:all_artists
       [{:name "Crass", :id "1"}
        {:name "Subhumans", :id "10"}]}}
+
+artist_by_id:
+  query: |-
+    {
+      artist_by_id(id: "1") {
+        name
+        id
+      }
+    }
+  response: |-
+    {:data
+     {:artist_by_id
+      {:name "Crass", :id "1"}}}
+
+artist_by_id_nil:
+  query: |-
+    {
+      artist_by_id(id: "666") {
+        name
+        id
+      }
+    }
+  response: |-
+    {:data {:artist_by_id nil}}
 
