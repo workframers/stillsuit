@@ -1,10 +1,16 @@
 # I don't love yaml, but it's a little easier to format queries in here than in Clojure source
 # Use this file by calling (get-queries :basic)
-queries:
-  basic: |-
+all_artists:
+  query: |-
     {
       all_artists {
         name
         id
       }
     }
+  response: |-
+    {:data
+     {:all_artists
+      [{:name "Crass", :id "1"}
+       {:name "Subhumans", :id "10"}]}}
+

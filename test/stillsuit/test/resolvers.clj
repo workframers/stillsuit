@@ -5,7 +5,8 @@
             [clojure.tools.logging :as log]
             [com.walmartlabs.lacinia.util :as util]
             [com.walmartlabs.lacinia.schema :as schema]
-            [datomic.api :as d]))
+            [datomic.api :as d]
+            [clojure.tools.reader.edn :as edn]))
 
 (use-fixtures :once fixtures/once)
 (use-fixtures :each fixtures/each)
@@ -30,23 +31,5 @@
   {:query/artist-by-id get-artist-by-id
    :query/all-artists  get-all-artists})
 
-(deftest test-res-outbound
-  (testing "load database"
-    (let [{::fixtures/keys [context schema queries] :as opt}
-          (fixtures/load-setup :music music-resolver-map)
-          query  (:basic queries)
-          result (lacinia/execute schema query nil context)
-          data   (get-in result [:data :all_artists])]
-      (is (map? schema))
-      (is (nil? (:errors result)))
-      (is (some? data)))))
-
-(deftest ns-resolve-factory
-  (let [base-schema {:queries
-                     {:hello {:type    'String
-                              :resolve [:complex/keyword "Hello World"]}}}
-        resolvers   {:complex/keyword (constantly (constantly "world"))}
-        compiled    (-> base-schema
-                        (util/attach-resolvers resolvers)
-                        schema/compile)]
-    (is (some? compiled))))
+(deftest test-music-queries
+  (fixtures/verify-queries! (fixtures/load-setup :music music-resolver-map)))
