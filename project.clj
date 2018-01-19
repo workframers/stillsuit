@@ -19,7 +19,9 @@
                  [clojure.java-time "0.3.1"]
                  [org.clojure/tools.logging "0.4.0"]
                  [org.apache.logging.log4j/log4j-core "2.10.0"]
-                 [org.apache.logging.log4j/log4j-slf4j-impl "2.10.0"]]
+                 [org.apache.logging.log4j/log4j-slf4j-impl "2.10.0"]
+
+                 [org.clojure/tools.reader "1.1.1"]]
 
   :plugins [[s3-wagon-private "1.3.1" :exclusions [commons-logging]]]
 
@@ -35,6 +37,7 @@
                                                  com.fasterxml.jackson.core/jackson-core
                                                  com.fasterxml.jackson.core/jackson-databind]]
                                    [venantius/ultra "0.5.2" :exclusions [org.clojure/clojure]]
+                                   [lein-cloverage "1.0.10"]
                                    [com.jakemccrary/lein-test-refresh "0.22.0"]]
                     :dependencies [[vvvvalvalval/datomock "0.2.0"]
                                    [io.forward/yaml "1.0.6"]]}
