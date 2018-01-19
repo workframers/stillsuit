@@ -16,6 +16,8 @@
 
 (def ^:private db-store (atom {}))
 
+;; Datomic fixtures
+
 (defn- provision-db
   [db-name]
   (let [db-str (name db-name)
@@ -29,20 +31,6 @@
           @(d/transact conn tx))
         (log/debugf "Loaded %d transactions from %s" (count txes) db-str)
         conn))))
-
-(defn- get-schema
-  [db-name]
-  (->> db-name
-       name
-       (format "resources/test-schemas/%s/lacinia.edn")
-       util/load-edn-resource))
-
-(defn- get-config
-  [db-name]
-  (->> db-name
-       name
-       (format "resources/test-schemas/%s/stillsuit.edn")
-       util/load-edn-resource))
 
 (defn- setup-datomic []
   (doseq [db-name all-db-names
@@ -75,6 +63,22 @@
 (defn- get-db [db-name]
   (d/db (get-connection db-name)))
 
+;; Test harness stuff
+
+(defn- get-schema
+  [db-name]
+  (->> db-name
+       name
+       (format "resources/test-schemas/%s/lacinia.edn")
+       util/load-edn-resource))
+
+(defn- get-config
+  [db-name]
+  (->> db-name
+       name
+       (format "resources/test-schemas/%s/stillsuit.edn")
+       util/load-edn-resource))
+
 (defn- get-context [db-name]
   (stillsuit/app-context nil (get-connection db-name)))
 
@@ -89,17 +93,22 @@
        yaml/parse-string))
 
 (defn load-setup
-  "Return a tuple [app-context resolver-map compiled-schema]"
-  [db-name resolver-map]
-  (let [config   (get-config db-name)
-        context  (get-context db-name)
-        schema   (get-schema db-name)
-        queries  (get-query-doc db-name)
-        compiled (stillsuit/decorate schema config resolver-map)]
-    {::context   context
-     ::config    config
-     ::schema    compiled
-     ::query-doc queries}))
+  "Given a db-name which maps to a directory under test/resources/test-schemas, load up a
+  bunch of sample edn data and queries and compile a schema. Return a map of the data which
+  can be passed to (execute-query) for further testing."
+  ([db-name resolver-map]
+   (load-setup db-name resolver-map nil))
+  ([db-name resolver-map overrides]
+   (let [config   (get-config db-name)
+         context  (get-context db-name)
+         schema   (get-schema db-name)
+         queries  (get-query-doc db-name)
+         compiled (stillsuit/decorate schema config resolver-map)]
+     (util/deep-map-merge {::context   context
+                           ::config    config
+                           ::schema    compiled
+                           ::query-doc queries}
+                          overrides))))
 
 (defn execute-query
   "Given a setup map as returned by (load-setup), execute the query defined in the associated YAML"
@@ -111,8 +120,8 @@
      (lacinia/execute schema query variables context))))
 
 (defn verify-queries!
-  "Given a setup map returned by load-setup, run through every query, executing each one and
-  comparing it to the expected output."
+  "Given a setup map returned by load-setup, run through every query in the queries.yaml file,
+  executing each one and asserting that its output is identical to the expected output, if any."
   [setup]
   (testing "Verifying query response"
     (doseq [qname (-> setup ::query-doc keys sort)
@@ -126,15 +135,3 @@
 
 (def once (test/join-fixtures [datomic-fixture]))
 (def each (test/join-fixtures [catch-fixture]))
-
-;(defn datomic-fork
-;  "This fixture redefines datomic/get-connection so that it returns a forked version
-;  of the datomic db from setup-base-db. Similar to acme-fixtures/datomic-rollback,
-;  biut faster because it doesn't need to reload the migrations per invocation."
-;  [test-fn]
-;  ;; setup
-;  (let [mock-conn (dm/mock-conn mock-datomic-base)]
-;    (with-redefs [datomic/get-connection (constantly mock-conn)]
-;      ;; run the tests
-;      (test-fn))))
-

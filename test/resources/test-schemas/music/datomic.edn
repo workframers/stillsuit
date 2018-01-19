@@ -37,7 +37,8 @@
   {:db/ident       :track/position
    :db/valueType   :db.type/long
    :db/cardinality :db.cardinality/many}]
- ;; Entities
+
+ ;; Data
  [{:db/id       "crass"
    :artist/id   1
    :artist/name "Crass"}
@@ -46,7 +47,6 @@
    :album/name     "The Feeding Of The 5000"
    :album/year     1977
    :artist/_albums "crass"}
-   ;:album/tracks   #{"feeding1" "feeding2" "feeding3"}}
   {:db/id          "feeding1"
    :track/id       3
    :track/name     "Asylum"
