@@ -2,6 +2,7 @@
   :description "lacinia-datomic utilities"
   :url "https://github.com/workframers/stillsuit"
   :pedantic? :warn
+  :min-lein-version "2.8.1"
   :license {:name "EPL"
             :url  "http://www.eclipse.org/legal/epl-v10.html"}
 
@@ -20,13 +21,19 @@
                  [org.apache.logging.log4j/log4j-core "2.10.0"]
                  [org.apache.logging.log4j/log4j-slf4j-impl "2.10.0"]]
 
-  :min-lein-version "2.8.1"
+  :plugins [[s3-wagon-private "1.3.1" :exclusions [commons-logging]]]
+
+  :repositories [["private" {:url "s3p://deployment.workframe.com/maven/releases/" :no-auth true}]]
 
   :source-paths ["src"]
 
   :test-selectors {:watch :watch}
 
-  :profiles {:dev  {:plugins      [[lein-ancient "0.6.15"]
+  :profiles {:dev  {:plugins      [[lein-ancient "0.6.15"
+                                    :exclusions [commons-logging
+                                                 com.fasterxml.jackson.core/jackson-annotations
+                                                 com.fasterxml.jackson.core/jackson-core
+                                                 com.fasterxml.jackson.core/jackson-databind]]
                                    [venantius/ultra "0.5.2" :exclusions [org.clojure/clojure]]
                                    [com.jakemccrary/lein-test-refresh "0.22.0"]]
                     :dependencies [[vvvvalvalval/datomock "0.2.0"]
