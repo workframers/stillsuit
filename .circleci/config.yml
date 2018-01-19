@@ -1,0 +1,62 @@
+version: 2
+
+docker_defaults: &docker_defaults
+  docker:
+    - image: 191234350269.dkr.ecr.us-east-1.amazonaws.com/circleci-build:1.3
+      environment:
+        JAVA_OPTS: "-Xms512m -Xmx3200m"
+        LEIN_ROOT: nbd
+
+restore_anchor: &restore_anchor
+  restore_cache:
+    key: workframe-stillsuit-{{ checksum "project.clj" }}
+
+jobs:
+  dependencies:
+    <<: *docker_defaults
+    steps:
+      - checkout
+      - <<: *restore_anchor
+      - run: lein with-profile +test deps
+      - run: lein jar
+      - save_cache:
+          key: workframe-stillsuit-{{ checksum "project.clj" }}
+          paths:
+            - ~/.m2
+            - target
+  clj_tests:
+    <<: *docker_defaults
+    steps:
+      - checkout
+      - <<: *restore_anchor
+      - run: lein with-profile +test cloverage -s test --junit
+      - store_test_results:
+          path: target/coverage
+      - store_artifacts:
+          path: target/coverage
+  deploy:
+    <<: *docker_defaults
+    steps:
+      - checkout
+      - <<: *restore_anchor
+      - run:
+          name: Compile jar
+          command: lein install
+#      - deploy:
+#          name: Deploy to S3
+#          command: lein essthree
+
+workflows:
+  version: 2
+  compile_test_deploy:
+    jobs:
+      - dependencies
+      - clj_tests:
+          requires:
+            - dependencies
+      - deploy:
+          requires:
+            - clj_tests
+          filters:
+            tags:
+              only: /^release-.*/
