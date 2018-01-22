@@ -41,3 +41,28 @@ artist_by_id_nil:
   response: |-
     {:data {:artist_by_id nil}}
 
+artist_by_id_traverse:
+  query: |-
+    {
+      artist_by_id(id: "1") {
+        albums {
+          name
+          year
+        }
+      }
+    }
+  # TODO: the albums list comes across in hash-map order; needs to be stable
+  response: |-
+    {:data {:artist_by_id {:albums [{:year 1977 :name "The Feeding of the 5000"}
+                                    {:year 1979 :name "Stations of the Crass"}]}}}
+
+album_by_id:
+  query: |-
+    {
+      album_by_id(id: "2") {
+        name
+        id
+      }
+    }
+  response: |-
+    {:data {:album_by_id {:name "The Feeding of the 5000" :id "2"}}}

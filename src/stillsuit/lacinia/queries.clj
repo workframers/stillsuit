@@ -29,29 +29,29 @@
 (defn stillsuit-unique-attribute-query
   [{:stillsuit/keys [entity-id-query-name datomic-entity-type]}]
   {:type        datomic-entity-type
-   :args        {:eid {:type        '(non-null ID)
+   :args        {:id  {:type        '(non-null ID)
                        :description "The `:db/id` of the entity"}}
-   :resolve     [:stillsuit-resolve-by-unique-id datomic-entity-type]
+   :resolve     [:stillsuit/query-by-unique-id datomic-entity-type]
    :description "Get a `%s` entity by specifying its `%` attribute."})
 
-;; TODO: break up attr-info
+;; TODO: specs - ensure only one arg
 (defn unique-attribute-query-resolver
-  "Catchpocket interface to a generic query, expected to be referenced as a resolver as
-  :resolve [:stillsuit-resolve-by-unique-id :ReturnType attr-info]"
-  [& [return-type attr-info]]
+  "Catchpocket interface to a generic query, expected to be referenced as a resolver:
+
+  :resolve [:stillsuit/resolve-by-unique-id {:stillsuit/attribute :example/attribute
+                                             :stillsuit/type      :LaciniaTypeName}]"
+  [{:stillsuit/keys [attribute lacinia-type]}]
   ^resolve/ResolverResult
-  (fn unique-attribute-query-resolver-fn [{:stillsuit/keys [db options]} args value]
-    (let [{:attribute/keys [ident field-type]} attr-info
-          arg    (-> args vals first)
-          result (datomic/get-entity-by-unique-attribute db ident arg)]
-      ;(log/spy [arg ident field-type result])
+  (fn unique-attribute-query-resolver-fn [{:stillsuit/keys [db]} args value]
+    (let [arg    (-> args vals first)
+          result (datomic/get-entity-by-unique-attribute db attribute arg)]
       (resolve/resolve-as
-       (schema/tag-with-type result return-type)))))
+       (schema/tag-with-type result lacinia-type)))))
 
 (defn resolver-map
   [{:stillsuit/keys [entity-id-query-name query-by-unique-id-name]}]
   {:stillsuit/resolve-by-enitity-id entity-id-query-resolver
-   :stillsuit-resolve-by-unique-id  unique-attribute-query-resolver})
+   :stillsuit/query-by-unique-id  unique-attribute-query-resolver})
 
 (defn attach-queries [schema config]
   (let [{:stillsuit/keys [entity-id-query-name query-by-unique-id-name]} config]

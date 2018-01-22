@@ -44,7 +44,7 @@
    :artist/name "Crass"}
   {:db/id          "feeding"
    :album/id       2
-   :album/name     "The Feeding Of The 5000"
+   :album/name     "The Feeding of the 5000"
    :album/year     1977
    :artist/_albums "crass"}
   {:db/id          "feeding1"
@@ -65,7 +65,7 @@
   {:db/id          "stations"
    :album/id       6
    :album/name     "Stations of the Crass"
-   :album/year     1977
+   :album/year     1979
    :artist/_albums "crass"}
   {:db/id          "stations1"
    :track/id       7

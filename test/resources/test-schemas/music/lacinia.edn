@@ -4,24 +4,38 @@
   {:description "Artist"
    :fields      {:id     {:type (non-null ID)}
                  :name   {:type (non-null String)}
-                 :albums {:type (list (non-null :Album))}}}
+                 :albums {:type    (list (non-null :Album))
+                          :resolve [:stillsuit/attribute
+                                    #:stillsuit{:attribute    :artist/albums
+                                                :lacinia-type :Album
+                                                :sort-key     :album/year
+                                                :sort-order   :ascending}]}}}
   :Album
   {:description "Album"
    :fields      {:id     {:type (non-null ID)}
                  :name   {:type (non-null String)}
+                 :year   {:type (non-null Int)}
                  :tracks {:type (list (non-null :Track))}}}
   :Track
   {:description "Track"
    :fields      {:id   {:type (non-null ID)}
                  :name {:type (non-null String)}}}}
 
- ;; Corresponding resolvers are defined in stillsuit.test.resolvers
  :queries
- {:artist_by_id
+ {;; This query uses a function defined in stillsuit.test.resolvers
+  :artist_by_id
   {:type        :Artist
    :description "Get an artist by ID"
    :args        {:id {:type ID}}
    :resolve     :query/artist-by-id}
+  ;; This query uses the built-in :stillsuit/resolve-by-unique-id resolver
+  :album_by_id
+  {:type        :Album
+   :description "Get an artist by ID"
+   :args        {:id {:type ID}}
+   :resolve     [:stillsuit/query-by-unique-id
+                 #:stillsuit{:attribute    :album/id
+                             :lacinia-type :Album}]}
   :all_artists
   {:type        (list (non-null :Artist))
    :description "Get an artist by ID"

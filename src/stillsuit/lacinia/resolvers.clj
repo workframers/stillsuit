@@ -35,15 +35,24 @@
     ;  (date-time-result value)
     value))
 
+(defn- entity-sort
+  [{:stillsuit/keys [sort-key sort-order] :as opts} entity-set]
+  (let [comparator (if (= sort-order :ascending) compare #(compare %2 %1))
+        keyfn      (or sort-key :db/id)]
+    (sort-by keyfn comparator entity-set)))
+
 (defn ref-resolver
   "Resolver used to get a literal attribute value out of an entity, eg in
-  :resolve [:stillsuit-entity-attribute :artist/_country]"
-  [datomic-attribute return-type]
+  :resolve [:stillsuit/attribute {:stillsuit/attribute :artist/_country}]"
+  [{:stillsuit/keys [attribute lacinia-type] :as opts}]
   ^resolve/ResolverResult
-  (fn [{:keys [:stillsuit/options]} args entity]
-    (let [value (get entity datomic-attribute)]
+  (fn [context args entity]
+    (let [value  (get entity attribute)
+          sorted (if (set? value)
+                   (entity-sort opts value)
+                   value)]
       (resolve/resolve-as
-       (schema/tag-with-type value return-type)))))
+       (schema/tag-with-type sorted lacinia-type)))))
 
 (defn datomic-entity-interface
   [config]
@@ -67,5 +76,5 @@
        (get value field-name)))))
 
 (defn resolver-map [config]
-  {:stillsuit.entity-attribute ref-resolver})
+  {:stillsuit/attribute ref-resolver})
 
