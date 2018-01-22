@@ -42,9 +42,9 @@ jobs:
       - run:
           name: Compile jar
           command: lein install
-#      - deploy:
-#          name: Deploy to S3
-#          command: lein essthree
+      - deploy:
+          name: Deploy to S3
+          command: lein deploy workframe-private
 
 workflows:
   version: 2

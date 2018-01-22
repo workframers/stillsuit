@@ -25,7 +25,8 @@
 
   :plugins [[s3-wagon-private "1.3.1" :exclusions [commons-logging]]]
 
-  :repositories [["private" {:url "s3p://deployment.workframe.com/maven/releases/" :no-auth true}]]
+  :repositories [["workframe-private" {:url "s3p://deployment.workframe.com/maven/releases/"
+                                       :no-auth true}]]
 
   :source-paths ["src"]
 
