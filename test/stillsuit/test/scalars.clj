@@ -11,16 +11,24 @@
 (use-fixtures :each fixtures/each)
 
 (defn- rainbow-by-id [{:keys [:stillsuit/db]} {:keys [id]} _]
-  (let [num (-> id read-string long)]
-    (d/entity db [:rainbow/id num])))
+  (d/entity db [:rainbow/id num]))
 
 (defn- echo-rainbow [{:keys [:stillsuit/db]} args value]
   (log/spy args)
   (log/spy value)
   nil)
 
-(def resolver-map {:mutation/echo       echo-rainbow
-                   :query/rainbow-by-id rainbow-by-id})
+(def rainbow-resolver-map {:mutation/echo echo-rainbow
+                           :query/rainbow-by-id   rainbow-by-id})
+
+(deftest test-music-queries
+  (try
+    (fixtures/verify-queries!
+   ;(log/spy
+      (fixtures/load-setup :rainbow rainbow-resolver-map))
+
+    (catch Exception e
+      (.printStackTrace e))))
 
 ; hrm, compile troubles
 ;(deftest test-scalars-outbound

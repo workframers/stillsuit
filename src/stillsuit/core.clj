@@ -25,6 +25,7 @@
    :stillsuit/entity-id-query-name    :entity_by_eid
    :stillsuit/query-by-unique-id-name :entity_by_unique_id
    :stillsuit/no-default-resolver?    false
+   :stillsuit/no-scalars?             false
    :stillsuit/compile?                true})
 
 (defn decorate-resolver-map
@@ -51,6 +52,7 @@
      (when (:stillsuit/trace? opts)
        (log/spy :trace uncompiled))
      (if (:stillsuit/compile? opts)
-       (let [with-resolvers (util/attach-resolvers uncompiled (decorate-resolver-map resolver-map))]
-         (schema/compile with-resolvers compile-opts))
+       (let [with-resolvers (util/attach-resolvers uncompiled (decorate-resolver-map resolver-map))
+             with-scalars   (util/attach-scalar-transformers with-resolvers (ss/transformer-map opts))]
+         (schema/compile with-scalars compile-opts))
        uncompiled))))

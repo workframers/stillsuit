@@ -41,18 +41,34 @@
         keyfn      (or sort-key :db/id)]
     (sort-by keyfn comparator entity-set)))
 
+(defn- ensure-single
+  "Resolve a reference attribute whose resolver was tagged with :stillsuit/single?. Return
+  a pair [value errors]. The error condition occurs if an attribute marked as single results
+  in more than one result."
+  [opts entity-set]
+  (if (> (count entity-set) 1)
+    [nil {:message (format "Expected a single %s result resolving attribute %s, but found %d results!"
+                           (:stillsuit/lacinia-type opts)
+                           (:stillsuit/attribute opts)
+                           (count entity-set))}]
+    ;; Else one or zero entities
+    [(first entity-set) nil]))
+
 (defn ref-resolver
   "Resolver used to get a literal attribute value out of an entity, eg in
   :resolve [:stillsuit/attribute {:stillsuit/attribute :artist/_country}]"
-  [{:stillsuit/keys [attribute lacinia-type] :as opts}]
+  [{:stillsuit/keys [attribute lacinia-type single?] :as opts}]
   ^resolve/ResolverResult
   (fn [context args entity]
-    (let [value  (get entity attribute)
-          sorted (if (set? value)
-                   (entity-sort opts value)
-                   value)]
+    (let [value (get entity attribute)
+          [sorted errs] (if (set? value)
+                          (if single?
+                            (ensure-single opts value)
+                            [(entity-sort opts value) nil])
+                          [value nil])]
       (resolve/resolve-as
-       (schema/tag-with-type sorted lacinia-type)))))
+       (schema/tag-with-type sorted lacinia-type)
+       errs))))
 
 (defn datomic-entity-interface
   [config]
@@ -76,5 +92,5 @@
        (get value field-name)))))
 
 (defn resolver-map [config]
-  {:stillsuit/attribute ref-resolver})
+  {:stillsuit/ref ref-resolver})
 

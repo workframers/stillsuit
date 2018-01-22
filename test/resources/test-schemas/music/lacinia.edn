@@ -5,7 +5,10 @@
    :fields      {:id     {:type (non-null ID)}
                  :name   {:type (non-null String)}
                  :albums {:type    (list (non-null :Album))
-                          :resolve [:stillsuit/attribute
+                          ;; This resolver factory tells stillsuit to resolve `albums` using
+                          ;; the datomic attribute `:artist/albums`, and to sort the resulting
+                          ;; set by the `album/year` attribute of the referred entities
+                          :resolve [:stillsuit/ref
                                     #:stillsuit{:attribute    :artist/albums
                                                 :lacinia-type :Album
                                                 :sort-key     :album/year
@@ -15,24 +18,38 @@
    :fields      {:id     {:type (non-null ID)}
                  :name   {:type (non-null String)}
                  :year   {:type (non-null Int)}
-                 :tracks {:type (list (non-null :Track))}}}
+
+                 ;; This reference uses the default resolver, inferring the attribute name
+                 ;; :album/tracks from the type and field name.
+                 :tracks {:type (list (non-null :Track))}
+
+                 ;; This resolver factory tells stillsuit to use the `:artist/_albums`
+                 ;; backreference to go from an album to its artist. The `:stillsuit/single?`
+                 ;; key tells stillsuit to return a single attribute, rather than a List of them.
+                 ;; An error will be returned if more than one result is found.
+                 :artist {:type    (non-null :Artist)
+                          :resolve [:stillsuit/ref
+                                    #:stillsuit{:attribute    :artist/_albums
+                                                :lacinia-type :Artist
+                                                :single?      true}]}}}
+
   :Track
   {:description "Track"
    :fields      {:id   {:type (non-null ID)}
                  :name {:type (non-null String)}}}}
 
  :queries
- {;; This query uses a function defined in stillsuit.test.resolvers
-  :artist_by_id
+ {:artist_by_id
   {:type        :Artist
    :description "Get an artist by ID"
    :args        {:id {:type ID}}
+   ;; This query uses a function defined in stillsuit.test.resolvers
    :resolve     :query/artist-by-id}
-  ;; This query uses the built-in :stillsuit/resolve-by-unique-id resolver
   :album_by_id
   {:type        :Album
    :description "Get an artist by ID"
    :args        {:id {:type ID}}
+   ;; This query uses the built-in :stillsuit/resolve-by-unique-id resolver
    :resolve     [:stillsuit/query-by-unique-id
                  #:stillsuit{:attribute    :album/id
                              :lacinia-type :Album}]}

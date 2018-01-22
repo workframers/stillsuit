@@ -24,7 +24,7 @@
                  :oneBoolean {:type Boolean}
                  :oneLong    {:type :JavaLong}
                  :oneBigint  {:type :JavaBigInt}
-                 :oneFloat   {:type :JavaFloat}
+                 :oneFloat   {:type :JavaDouble}
                  :oneDouble  {:type :JavaDouble}
                  :oneBigdec  {:type :JavaBigDec}
                  :oneInstant {:type :JavaDate}
@@ -35,7 +35,10 @@
   {:type        :Rainbow
    :description "Get a rainbow by ID"
    :args        {:id {:type ID}}
-   :resolve     :query/rainbow-by-id}}
+   :resolve     [:stillsuit/query-by-unique-id
+                 #:stillsuit{:attribute    :rainbow/id
+                             :datomic-type :db.type/string
+                             :lacinia-type :Rainbow}]}}
 
  :mutations
  {:echo

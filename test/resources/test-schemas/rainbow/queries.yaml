@@ -1,0 +1,46 @@
+# See comments in test/resources/test-schemas/music/queries.yaml for details
+nil-result:
+  query: |-
+    {
+      rainbowById(id: 7777) {
+        oneString
+        oneKeyword
+        oneBoolean
+        oneLong
+        oneBigint
+        oneFloat
+        oneDouble
+        oneBigdec
+        oneInstant
+        oneUuid
+        oneRef {
+          id
+        }
+      }
+    }
+  response: |-
+    {:data {:rainbowById nil } }
+
+one-result:
+  query: |-
+    {
+      rainbowById(id: 111) {
+        oneString
+        oneKeyword
+        oneBoolean
+        oneLong
+        oneBigint
+        oneFloat
+        oneDouble
+        oneBigdec
+        oneInstant
+        oneUuid
+        oneRef {
+          id
+        }
+      }
+    }
+  response: |-
+    {:data
+     {:rainbowById
+      {}}}

@@ -66,3 +66,16 @@ album_by_id:
     }
   response: |-
     {:data {:album_by_id {:name "The Feeding of the 5000" :id "2"}}}
+
+album_backref:
+  query: |-
+    {
+      album_by_id(id: "2") {
+        artist {
+          name
+          id
+        }
+      }
+    }
+  response: |-
+    {:data {:album_by_id {:artist {:name "Crass" :id "1"}}}}

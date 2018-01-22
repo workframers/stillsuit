@@ -29,8 +29,8 @@
 (defn stillsuit-unique-attribute-query
   [{:stillsuit/keys [entity-id-query-name datomic-entity-type]}]
   {:type        datomic-entity-type
-   :args        {:id  {:type        '(non-null ID)
-                       :description "The `:db/id` of the entity"}}
+   :args        {:id {:type        '(non-null ID)
+                      :description "The `:db/id` of the entity"}}
    :resolve     [:stillsuit/query-by-unique-id datomic-entity-type]
    :description "Get a `%s` entity by specifying its `%` attribute."})
 
@@ -51,7 +51,7 @@
 (defn resolver-map
   [{:stillsuit/keys [entity-id-query-name query-by-unique-id-name]}]
   {:stillsuit/resolve-by-enitity-id entity-id-query-resolver
-   :stillsuit/query-by-unique-id  unique-attribute-query-resolver})
+   :stillsuit/query-by-unique-id    unique-attribute-query-resolver})
 
 (defn attach-queries [schema config]
   (let [{:stillsuit/keys [entity-id-query-name query-by-unique-id-name]} config]
