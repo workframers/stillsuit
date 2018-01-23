@@ -18,32 +18,51 @@ nil-result:
         }
       }
     }
+  # No such id
   response: |-
     {:data {:rainbowById nil } }
 
-#one-result:
-#  query: |-
-#    {
-#      rainbowById(id: 111) {
-#        oneString
-#        oneKeyword
-#        oneBoolean
-#        oneLong
-#        oneBigint
-#        oneFloat
-#        oneDouble
-#        oneBigdec
-#        oneInstant
-#        oneUuid
-#        oneRef {
-#          id
-#        }
-#      }
-#    }
-#  response: |-
-#    {:data
-#     {:rainbowById
-#      {}}}
+# This query tests serialization of various data types to String.
+one-result:
+  query: |-
+    {
+      rainbowById(id: 111) {
+        oneString
+        oneKeyword
+        oneBoolean
+        oneLong
+        oneBigint
+        oneFloat
+        oneDouble
+        oneBigdec
+        oneInstant
+        oneUuid
+        oneRef {
+          id
+        }
+      }
+    }
+  response: |-
+    {:data
+     {:rainbowById
+      {:oneBigdec "123.45",
+       :oneBigint "1321"
+       :oneBoolean true
+       ;; TODO: java double imprecision breaks these
+       :oneDouble 132.45
+       :oneFloat 132.45
+       :oneInstant "Mon Jan 01 11:48:13 EST 2018"
+       :oneKeyword ":my.keyword/value"
+       :oneLong "149"
+       :oneRef {:id "222"}
+       :oneString "One string"
+       :oneUuid "fcc81e3e-f301-11e7-8a4d-4762cfbddccf"}}}
+
+# These queries test scalar serialization (so that the resolver receives arguments
+# of the correct type). Each typecheck query takes two calls: value, which is the
+# argument value as a string, and expected, which is a string encoded as EDN.
+# The resolver will decode the EDN and then check that the `value` argument has
+# the same type as the decoded EDN, returning true if that's the case.
 
 typecheck_uuid:
   query: |-
@@ -60,7 +79,7 @@ typecheck_keyword:
 
 typecheck_long:
   query: |-
-    { typecheck_long(value: "22000000000", expected: "22000000000") }
+    { typecheck_long(value: "22000000000", expected: "1") }
   response: |-
     {:data {:typecheck_long true}}
 
@@ -79,5 +98,10 @@ typecheck_bigint:
 typecheck_double:
   query: |-
     { typecheck_double(value: "12.34", expected: "12.34") }
+  response: |-
+    {:data {:typecheck_double true}}
+typecheck_double2:
+  query: |-
+    { typecheck_double(value: "12", expected: "12.34") }
   response: |-
     {:data {:typecheck_double true}}

@@ -29,9 +29,11 @@
     ::description "A java.util.Date value, serialized as a string."}
    :db.type/float
    {::scalar      :JavaDouble
+    ::parse       :stillsuit.scalars/parse-double
     ::description "A Java float value, serialized as a string."}
    :db.type/double
    {::scalar      :JavaDouble
+    ::parse       :stillsuit.scalars/parse-double
     ::description "A Java double value, serialized as a string."}
    :db.type/uuid
    {::scalar      :JavaUUID
@@ -75,7 +77,8 @@
    :stillsuit.scalars/parse-uuid       parse-uuid
    :stillsuit.scalars/parse-java-date  parse-java-date
    :stillsuit.scalars/parse-bigint     (parse-as-value bigint)
-   :stillsuit.scalars/parse-bigdec     (parse-as-value bigdec)})
+   :stillsuit.scalars/parse-bigdec     (parse-as-value bigdec)
+   :stillsuit.scalars/parse-double     (parse-as-value double)})
 
 
 (defn attach-scalars

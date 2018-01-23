@@ -24,8 +24,8 @@
                  :oneBoolean {:type Boolean}
                  :oneLong    {:type :JavaLong}
                  :oneBigint  {:type :JavaBigInt}
-                 :oneFloat   {:type :JavaDouble}
-                 :oneDouble  {:type :JavaDouble}
+                 :oneFloat   {:type Float}
+                 :oneDouble  {:type Float}
                  :oneBigdec  {:type :JavaBigDec}
                  :oneInstant {:type :JavaDate}
                  :oneUuid    {:type :JavaUUID}
@@ -38,7 +38,8 @@
    :resolve     [:stillsuit/query-by-unique-id
                  #:stillsuit{:attribute    :rainbow/id
                              :datomic-type :db.type/string
-                             :lacinia-type :Rainbow}]}
+                             :lacinia-type :Rainbow
+                             :predicate    :my/pred}]}
   :typecheck_uuid
   {:type    (non-null Boolean)
    :args    {:value    {:type (non-null :JavaUUID)}

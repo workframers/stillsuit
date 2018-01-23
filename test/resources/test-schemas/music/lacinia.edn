@@ -4,7 +4,7 @@
   {:description "Artist"
    :fields      {:id     {:type (non-null ID)}
                  :name   {:type (non-null String)}
-                 :albums {:type    (list (non-null :Album))
+                 :albums {:type (list (non-null :Album))
                           ;; This resolver factory tells stillsuit to resolve `albums` using
                           ;; the datomic attribute `:artist/albums`, and to sort the resulting
                           ;; set by the `album/year` attribute of the referred entities
