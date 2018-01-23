@@ -39,6 +39,7 @@
                                                  com.fasterxml.jackson.core/jackson-databind]]
                                    [venantius/ultra "0.5.2" :exclusions [org.clojure/clojure]]
                                    [lein-cloverage "1.0.10"]
+                                   [lein-codox "0.10.3"]
                                    [com.jakemccrary/lein-test-refresh "0.22.0"]]
                     :dependencies [[vvvvalvalval/datomock "0.2.0"]
                                    [io.forward/yaml "1.0.6"]]}
