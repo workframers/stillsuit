@@ -1,88 +1,88 @@
 (ns stillsuit.lacinia.scalars
   (:require [com.walmartlabs.lacinia.schema :as schema]
-            [clojure.edn :refer [read-string]]
-            [clojure.tools.logging :as log])
-  (:import (java.util Date UUID))
+            [clojure.tools.logging :as log]
+            [clojure.edn :as edn])
+  (:import (java.util Date UUID)
+           (clojure.lang Keyword)
+           (java.time ZonedDateTime))
   (:refer-clojure :exclude [read-string]))
-
-(defn date->string
-  [^Date d])
-
-(defn ^Date string->date
-  [^Date d])
-
-(defn parse-val
-  [xform]
-  (schema/as-conformer
-   (fn [thing]
-     (log/spy thing)
-     (let [value (if (string? thing)
-                   (read-string thing)
-                   thing)]
-       (xform value)))))
 
 (def scalar-options
   "Map from datomic db.type values to data for custom scalars"
   {:db.type/bigdec
-   {::name        :JavaBigDec
-    ::parse       :stillsuit.scalars/parse-edn
-    ::serialize   (schema/as-conformer str)
+   {::scalar      :JavaBigDec
+    ::parse       :stillsuit.scalars/parse-bigdec
     ::description "A Java BigDecimal value, serialized as a string."}
    :db.type/bigint
-   {::name        :JavaBigInt
-    ::parse       (parse-val bigint)
-    ::serialize   (schema/as-conformer str)
+   {::scalar      :JavaBigInt
+    ::parse       :stillsuit.scalars/parse-bigint
     ::description "A Java BigInteger value, serialized as a string."}
    :db.type/long
-   {::name        :JavaLong
-    ::parse       (parse-val long)
-    ::serialize   (schema/as-conformer str)
+   {::scalar      :JavaLong
     ::description "A Java long value, serialized as a string (because it can be more than 32 bits)."}
    :db.type/keyword
-   {::name        :ClojureKeyword
-    ::parse       (parse-val keyword)
-    ::serialize   (schema/as-conformer str)
+   {::scalar      :ClojureKeyword
     ::description "A Clojure keyword value, serialized as a string."}
    :db.type/instant
-   {::name        :JavaDate
-    ::parse       (schema/as-conformer read-string)
-    ::serialize   (schema/as-conformer pr-str)
+   {::scalar      :JavaDate
+    ::parse       :stillsuit.scalars/parse-java-date
     ::description "A java.util.Date value, serialized as a string."}
    :db.type/float
-   {::name        :JavaDouble
-    ::parse       (schema/as-conformer read-string)
-    ::serialize   (schema/as-conformer pr-str)
+   {::scalar      :JavaDouble
     ::description "A Java float value, serialized as a string."}
    :db.type/double
-   {::name        :JavaDouble
-    ::parse       (schema/as-conformer read-string)
-    ::serialize   (schema/as-conformer pr-str)
+   {::scalar      :JavaDouble
     ::description "A Java double value, serialized as a string."}
    :db.type/uuid
-   {::name        :JavaUUID
-    ::parse       (parse-val #(UUID/fromString (str %)))
-    ::serialize   (schema/as-conformer str)
+   {::scalar      :JavaUUID
+    ::parse       :stillsuit.scalars/parse-uuid
     ::description "A java.util.UUID value, serialized as a string."}})
 
 (defn attach-scalar [scalars db-type]
-  (let [{:keys [::name ::parse ::serialize ::description]} (get scalar-options db-type)]
-    (assoc scalars name {:parse parse :serialize serialize :description description})))
+  (let [{:keys [::scalar ::parse ::serialize ::description]} (get scalar-options db-type)]
+    (assoc scalars scalar {:parse       (or parse :stillsuit.scalars/parse-edn)
+                           :serialize   (or serialize :stillsuit.scalars/serialize-str)
+                           :description description})))
 
 (defn- attach-overrides
   [schema overrides]
   (assoc schema :scalars (reduce attach-scalar (:scalars schema) overrides)))
 
+(def parse-edn
+  (schema/as-conformer edn/read-string))
+
+(def serialize-str
+  (schema/as-conformer str))
+
+(def serialize-pr-str
+  (schema/as-conformer pr-str))
+
+(def parse-uuid
+  (schema/as-conformer (fn [^String u] (UUID/fromString u))))
+
+(def parse-java-date
+  (schema/as-conformer (fn [^String d] (ZonedDateTime/parse d))))
+
+(defn parse-as-value
+  [type-convert]
+  (schema/as-conformer (fn [^String k]
+                         (type-convert (edn/read-string k)))))
+
 (defn transformer-map [config]
-  {:stillsuit.scalars/parse-edn     (schema/as-conformer (fn [^String v]
-                                                           (read-string v)))
-   :stillsuit.scalars/serialize-edn (schema/as-conformer (fn [v] (pr-str v)))})
+  {:stillsuit.scalars/parse-edn        parse-edn
+   :stillsuit.scalars/serialize-str    serialize-str
+   :stillsuit.scalars/serialize-pr-str serialize-pr-str
+   :stillsuit.scalars/parse-uuid       parse-uuid
+   :stillsuit.scalars/parse-java-date  parse-java-date
+   :stillsuit.scalars/parse-bigint     (parse-as-value bigint)
+   :stillsuit.scalars/parse-bigdec     (parse-as-value bigdec)})
 
 
 (defn attach-scalars
   [schema {:keys [:stillsuit/scalars] :as config}]
   (cond-> schema
-          (not (:stillsuit.scalar/skip-defaults? config))
-          (attach-overrides (-> scalar-options keys set))
+    (not (:stillsuit.scalar/skip-defaults? config))
+    (attach-overrides (-> scalar-options keys set))
 
-          (set? (:stillsuit.scalar/for-fields scalars))
-          (attach-overrides (:stillsuit.scalar/for-fields scalars))))
+    (set? (:stillsuit.scalar/for-fields scalars))
+    (attach-overrides (:stillsuit.scalar/for-fields scalars))))

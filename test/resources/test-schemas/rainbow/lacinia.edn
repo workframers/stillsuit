@@ -38,16 +38,61 @@
    :resolve     [:stillsuit/query-by-unique-id
                  #:stillsuit{:attribute    :rainbow/id
                              :datomic-type :db.type/string
-                             :lacinia-type :Rainbow}]}}
+                             :lacinia-type :Rainbow}]}
+  :typecheck_uuid
+  {:type    (non-null Boolean)
+   :args    {:value    {:type (non-null :JavaUUID)}
+             :expected {:type (non-null String)}}
+   :resolve :rainbow/typecheck}
 
- :mutations
- {:echo
-  {:type        :Rainbow
-   :description "Return input"
-   :args        {:keyword {:type :ClojureKeyword}
-                 :uuid    {:type :JavaUUID}
-                 :date    {:type :JavaDate}
-                 :bigdec  {:type :JavaBigDec}
-                 :bigint  {:type :JavaBigInt}}
-   :resolve     :mutation/echo}}}
+  :typecheck_keyword
+  {:type    (non-null Boolean)
+   :args    {:value    {:type (non-null :ClojureKeyword)}
+             :expected {:type (non-null String)}}
+   :resolve :rainbow/typecheck}
 
+  :typecheck_long
+  {:type    (non-null Boolean)
+   :args    {:value    {:type (non-null :JavaLong)}
+             :expected {:type (non-null String)}}
+   :resolve :rainbow/typecheck}
+
+  :typecheck_bigint
+  {:type    (non-null Boolean)
+   :args    {:value    {:type (non-null :JavaBigInt)}
+             :expected {:type (non-null String)}}
+   :resolve :rainbow/typecheck}
+
+  :typecheck_bigdec
+  {:type    (non-null Boolean)
+   :args    {:value    {:type (non-null :JavaBigDec)}
+             :expected {:type (non-null String)}}
+   :resolve :rainbow/typecheck}
+
+  :typecheck_double
+  {:type    (non-null Boolean)
+   :args    {:value    {:type (non-null :JavaDouble)}
+             :expected {:type (non-null String)}}
+   :resolve :rainbow/typecheck}}}
+
+  ;:echo_double
+  ;{:type    :JavaBigDec
+  ; :args    {:id {:type :JavaBigDec}}
+  ; :resolve :rainbow/identity}
+  ;
+  ;:echo_instant
+  ;{:type    :JavaDate
+  ; :args    {:id {:type :JavaDate}}
+  ; :resolve :rainbow/identity}}}
+
+
+;:mutations
+;{:echo
+; {:type        :Rainbow
+;  :description "Return input"
+;  :args        {:keyword {:type :ClojureKeyword}
+;                :uuid    {:type :JavaUUID}
+;                :date    {:type :JavaDate}
+;                :bigdec  {:type :JavaBigDec}
+;                :bigint  {:type :JavaBigInt}}
+;  :resolve     :mutation/echo}}}}

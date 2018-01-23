@@ -21,26 +21,63 @@ nil-result:
   response: |-
     {:data {:rainbowById nil } }
 
-one-result:
+#one-result:
+#  query: |-
+#    {
+#      rainbowById(id: 111) {
+#        oneString
+#        oneKeyword
+#        oneBoolean
+#        oneLong
+#        oneBigint
+#        oneFloat
+#        oneDouble
+#        oneBigdec
+#        oneInstant
+#        oneUuid
+#        oneRef {
+#          id
+#        }
+#      }
+#    }
+#  response: |-
+#    {:data
+#     {:rainbowById
+#      {}}}
+
+typecheck_uuid:
   query: |-
-    {
-      rainbowById(id: 111) {
-        oneString
-        oneKeyword
-        oneBoolean
-        oneLong
-        oneBigint
-        oneFloat
-        oneDouble
-        oneBigdec
-        oneInstant
-        oneUuid
-        oneRef {
-          id
-        }
-      }
-    }
+    { typecheck_uuid(value: "fcc81e3e-f301-11e7-8a4d-4762cfbddccf",
+                     expected: "#uuid \"fcc81e3e-f301-11e7-8a4d-4762cfbddccf\"") }
   response: |-
-    {:data
-     {:rainbowById
-      {}}}
+    {:data {:typecheck_uuid true}}
+
+typecheck_keyword:
+  query: |-
+    { typecheck_keyword(value: ":my/keyword", expected: ":keyword") }
+  response: |-
+    {:data {:typecheck_keyword true}}
+
+typecheck_long:
+  query: |-
+    { typecheck_long(value: "22000000000", expected: "22000000000") }
+  response: |-
+    {:data {:typecheck_long true}}
+
+typecheck_bigdec:
+  query: |-
+    { typecheck_bigdec(value: "23.45", expected: "23.45M") }
+  response: |-
+    {:data {:typecheck_bigdec true}}
+
+typecheck_bigint:
+  query: |-
+    { typecheck_bigint(value: "10000000000000000000", expected: "123N") }
+  response: |-
+    {:data {:typecheck_bigint true}}
+
+typecheck_double:
+  query: |-
+    { typecheck_double(value: "12.34", expected: "12.34") }
+  response: |-
+    {:data {:typecheck_double true}}

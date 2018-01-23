@@ -45,6 +45,7 @@
    (let [opts         (merge default-config config)
          uncompiled   (-> base-schema-edn
                           (ss/attach-scalars opts)
+                          ;(log/spy)
                           (sq/attach-queries opts)
                           (sr/attach-resolvers opts))
          compile-opts (when-not (:stillsuit/no-default-resolver? opts)
