@@ -19,12 +19,15 @@
 (def entity-id-query-resolver
   ^ResolverResult
   (fn entity-id-query-resolver-fn
-    [{:stillsuit/keys [config db] :as context} {:keys [eid] :as args} value]
-    (let [ent      (datomic/get-entity-by-eid db eid)
-          ent-type (types/lacinia-type ent config)]
-      (when (some? ent)
-        (resolve/resolve-as
-         (schema/tag-with-type ent ent-type))))))
+    [{:stillsuit/keys [config connection] :as context} {:keys [eid] :as args} value]
+    (if-let [db (some-> connection d/db)]
+      (let [ent      (datomic/get-entity-by-eid db eid)
+            ent-type (types/lacinia-type ent config)]
+        (when (some? ent)
+          (resolve/resolve-as
+           (schema/tag-with-type ent ent-type))))
+      ;; Else no db
+      (resolve/resolve-as nil {:message (format "Can't get db value from connection %s!" (str connection))}))))
 
 (defn stillsuit-unique-attribute-query
   [{:stillsuit/keys [entity-id-query-name datomic-entity-type]}]
@@ -43,11 +46,15 @@
   [{:stillsuit/keys [attribute lacinia-type]}]
   ^resolve/ResolverResult
   (fn unique-attribute-query-resolver-fn
-    [{:stillsuit/keys [connection]} args value]
-    (let [arg    (-> args vals first)
-          result (datomic/get-entity-by-unique-attribute (d/db connection) attribute arg)]
-      (resolve/resolve-as
-       (schema/tag-with-type result lacinia-type)))))
+    [{:stillsuit/keys [connection] :as ctx} args value]
+    (log/spy connection)
+    (if-let [db (some-> connection d/db)]
+      (let [arg    (some-> args vals first)
+            result (datomic/get-entity-by-unique-attribute db attribute arg)]
+        (resolve/resolve-as
+         (schema/tag-with-type result lacinia-type)))
+      ;; Else no db
+      (resolve/resolve-as nil {:message (format "Can't get db value from connection %s!" (str connection))}))))
 
 (defn resolver-map
   [{:stillsuit/keys [entity-id-query-name query-by-unique-id-name]}]

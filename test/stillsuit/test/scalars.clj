@@ -21,12 +21,10 @@
         expect-type (type expect-val)]
     (= val-type expect-type)))
 
-(defn- rainbow-by-id [{:keys [:stillsuit/db]} {:keys [id]} _]
-  (d/entity db [:rainbow/id num]))
+(defn- rainbow-by-id [{:keys [:stillsuit/connection]} {:keys [id]} _]
+  (some-> connection d/db (d/entity [:rainbow/id num])))
 
-(defn- echo-rainbow [{:keys [:stillsuit/db]} args value]
-  (log/spy args)
-  (log/spy value)
+(defn- echo-rainbow [context args value]
   (-> args vals first))
 
 (def rainbow-resolver-map {:mutation/echo       echo-rainbow

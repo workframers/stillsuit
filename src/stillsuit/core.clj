@@ -7,13 +7,24 @@
             [clojure.tools.logging :as log]
             [com.walmartlabs.lacinia.util :as util]))
 
+(defn datomic-connect
+  [db-uri]
+  (if-not db-uri
+    (log/error "No datomic URL defined in config or schema!")
+    (let [conn (d/connect db-uri)]
+      (log/infof "Connecting to datomic at %s..." db-uri)
+      conn)))
+
+
 (defn make-app-context
   "Return an app-context map suitable for handing to (lacinia/execute-query)."
   [base-context schema connection config]
-  (merge (select-keys schema [:stillsuit/enum-map])
-         {:stillsuit/connection connection
-          :stillsuit/config     config}
-         base-context))
+  (let [context-conn (or connection (datomic-connect (or (:catchpocket/datomic-uri config)
+                                                         (:stillsuit/datomic-uri schema))))]
+    (merge (select-keys schema [:stillsuit/enum-map])
+           {:stillsuit/connection context-conn
+            :stillsuit/config     config}
+           base-context)))
 
 (def default-config
   {:stillsuit/datomic-entity-type     :DatomicEntity
