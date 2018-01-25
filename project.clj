@@ -32,6 +32,9 @@
 
   :test-selectors {:watch :watch}
 
+  :codox {:metadata {:doc/format :markdown}
+          :themes [:rdash]}
+
   :profiles {:dev  {:plugins      [[lein-ancient "0.6.15"
                                     :exclusions [commons-logging
                                                  com.fasterxml.jackson.core/jackson-annotations
@@ -42,5 +45,6 @@
                                    [lein-codox "0.10.3"]
                                    [com.jakemccrary/lein-test-refresh "0.22.0"]]
                     :dependencies [[vvvvalvalval/datomock "0.2.0"]
+                                   [codox-theme-rdash "0.1.2"]
                                    [io.forward/yaml "1.0.6"]]}
              :test {:resource-paths ["test/resources"]}})

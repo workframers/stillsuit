@@ -1,0 +1,99 @@
+@startuml
+title Stillsuit Configuration
+
+file Config #ivory [
+  **""stillsuit.edn""**
+  ....
+  ""{:queries ""
+  "" {:my_query ""
+  ""  {:resolve :my/q-resolver}}}""
+]
+
+component RuntimeConfig #ivory [
+  **Runtime Configuration**
+  ....
+  ""{:stillsuit/datomic-uri ""
+  "" "datomic:dev:..."} ""
+]
+
+node UserResolvers #ivory [
+  **User Resolvers**
+  ....
+  ""{:my/q-resolver ""
+  "" (fn [c a v] ...)}""
+]
+
+database Datomic #ghostwhite [
+  **Datomic**
+  ....
+
+  "" {:my-thing/attr ""
+  ""  ...}""
+
+]
+
+node decorate #honeydew [
+  **""(stillsuit/decorate)""**
+]
+
+node StillsuitResolvers #honeydew [
+  **stillsuit resolvers**
+  ....
+  ""(ns stillsuit)""
+  ""(defn resolve-entity ""
+  ""  [a c v] ...)""
+]
+
+file CompiledSchema #honeydew [
+  **Compiled Schema**
+]
+
+component AppContext #honeydew [
+  **Application Context**
+]
+
+actor User #lavenderblush
+
+file Query #lavenderblush [
+  **GraphQL Query**
+  ....
+  ""{ my_query(id: 123) {""
+  ""  field }}""
+]
+
+node execute #azure [
+  **""(lacinia/execute)""**
+]
+
+file Result #azure [
+  **GraphQL Result**
+  ....
+  ""{:data ""
+  "" {:my_query ""
+  ""  {:field "abc"}}}""
+]
+
+Config ..> UserResolvers
+
+RuntimeConfig --> decorate
+Config --> decorate
+
+AppContext <.. StillsuitResolvers
+AppContext .> Datomic
+
+decorate --> AppContext
+decorate --> CompiledSchema
+
+CompiledSchema --> execute
+AppContext --> execute
+
+User --> Query
+Query --> execute
+
+StillsuitResolvers <--> execute
+UserResolvers <--> execute
+UserResolvers .> AppContext
+
+execute --> Result
+
+@enduml

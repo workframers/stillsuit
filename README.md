@@ -1,3 +1,5 @@
+# stillsuit
+
 stillsuit is a library that provides some facilities for
 accessing [datomic](http://www.datomic.com/) databases
 from the [lacinia](https://github.com/walmartlabs/lacinia)
@@ -12,8 +14,9 @@ For an example of using it, see the
 [stillsuit-sample project](https://github.com/workframers/stillsuit-sample).
 
 Note that because stillsuit relies heavily on the
-[datomic Entity API](https://docs.datomic.com/on-prem/entities.html),
+[datomic Entity API](https://docs.datomic.com/on-prem/entities.html), it
 only works with "On-Prem" datomic installations using the Peer libraries.
+In particular, it is not currently usable with Datomic Cloud.
 
 ## Installation
 
