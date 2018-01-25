@@ -4,4 +4,4 @@
 
 ## Basic operation
 
-![Summary diagram](stillsuit-summary.png?raw=true "Overview")
+![Summary diagram](stillsuit-summary.png "Overview")
