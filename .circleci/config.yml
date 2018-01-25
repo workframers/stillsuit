@@ -41,7 +41,7 @@ jobs:
       - <<: *restore_anchor
       - run: lein codox
       - store_artifacts:
-          path: target/docs
+          path: target/doc
   deploy:
     <<: *docker_defaults
     steps:
