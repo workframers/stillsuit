@@ -42,9 +42,10 @@
                                              :stillsuit/type      :LaciniaTypeName}]"
   [{:stillsuit/keys [attribute lacinia-type]}]
   ^resolve/ResolverResult
-  (fn unique-attribute-query-resolver-fn [{:stillsuit/keys [db]} args value]
+  (fn unique-attribute-query-resolver-fn
+    [{:stillsuit/keys [connection]} args value]
     (let [arg    (-> args vals first)
-          result (datomic/get-entity-by-unique-attribute db attribute arg)]
+          result (datomic/get-entity-by-unique-attribute (d/db connection) attribute arg)]
       (resolve/resolve-as
        (schema/tag-with-type result lacinia-type)))))
 

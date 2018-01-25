@@ -7,18 +7,13 @@
             [clojure.tools.logging :as log]
             [com.walmartlabs.lacinia.util :as util]))
 
-(defn app-context
+(defn make-app-context
   "Return an app-context map suitable for handing to (lacinia/execute-query)."
-  ([options]
-   (let [datomic-uri (or (:stillsuit/datomic-uri options) (:catchpocket/datomic-uri options))]
-     (log/debugf "Connecting to datomic at %s..." datomic-uri)
-     (app-context options (d/connect datomic-uri))))
-  ([options conn]
-   (app-context options conn (d/db conn)))
-  ([options conn db]
-   {:stillsuit/conn    conn
-    :stillsuit/options options
-    :stillsuit/db      db}))
+  [base-context schema connection config]
+  (merge (select-keys schema [:stillsuit/enum-map])
+         {:stillsuit/connection connection
+          :stillsuit/config     config}
+         base-context))
 
 (def default-config
   {:stillsuit/datomic-entity-type     :DatomicEntity
@@ -37,23 +32,25 @@
             (sr/resolver-map with-defaults)
             (sq/resolver-map with-defaults)))))
 
+;; TODO: specs
+
 (defn decorate
-  ""
-  ([base-schema-edn config]
-   (decorate base-schema-edn config {}))
-  ([base-schema-edn config resolver-map]
-   (let [opts         (merge default-config config)
-         uncompiled   (-> base-schema-edn
-                          (ss/attach-scalars opts)
-                          ;(log/spy)
-                          (sq/attach-queries opts)
-                          (sr/attach-resolvers opts))
-         compile-opts (when-not (:stillsuit/no-default-resolver? opts)
-                        {:default-field-resolver sr/default-resolver})]
-     (when (:stillsuit/trace? opts)
-       (log/spy :trace uncompiled))
-     (if (:stillsuit/compile? opts)
-       (let [with-resolvers (util/attach-resolvers uncompiled (decorate-resolver-map resolver-map))
-             with-scalars   (util/attach-scalar-transformers with-resolvers (ss/transformer-map opts))]
-         (schema/compile with-scalars compile-opts))
-       uncompiled))))
+  "Main interface to stillsuit. Accepts a map containing various parameters as input; returns
+  a map with an app context and a schema."
+  [{:stillsuit/keys [schema config resolvers transformers context connection]}]
+  (let [opts         (merge default-config config)
+        uncompiled   (-> schema
+                         (ss/attach-scalars opts)
+                         (sq/attach-queries opts)
+                         (sr/attach-resolvers opts)
+                         (util/attach-resolvers (decorate-resolver-map resolvers opts))
+                         (util/attach-scalar-transformers (ss/transformer-map transformers opts)))
+        compile-opts (when-not (:stillsuit/no-default-resolver? opts)
+                       {:default-field-resolver sr/default-resolver})
+        compiled     (if (:stillsuit/compile? opts)
+                       (schema/compile uncompiled compile-opts)
+                       uncompiled)]
+    (when (:stillsuit/trace? opts)
+      (log/spy :trace uncompiled))
+    {:stillsuit/schema      compiled
+     :stillsuit/app-context (make-app-context context schema connection opts)}))

@@ -79,9 +79,6 @@
        (format "resources/test-schemas/%s/stillsuit.edn")
        util/load-edn-resource))
 
-(defn- get-context [db-name]
-  (stillsuit/app-context nil (get-connection db-name)))
-
 (defn- get-query-doc
   [db-name]
   (->> db-name
@@ -99,14 +96,16 @@
   ([db-name resolver-map]
    (load-setup db-name resolver-map nil))
   ([db-name resolver-map overrides]
-   (let [config   (get-config db-name)
-         context  (get-context db-name)
-         schema   (get-schema db-name)
-         queries  (get-query-doc db-name)
-         compiled (stillsuit/decorate schema config resolver-map)]
-     (util/deep-map-merge {::context   context
+   (let [config    (get-config db-name)
+         schema    (get-schema db-name)
+         queries   (get-query-doc db-name)
+         decorated (stillsuit/decorate #:stillsuit{:schema     schema
+                                                   :config     config
+                                                   :connection (get-connection db-name)
+                                                   :resolvers  resolver-map})]
+     (util/deep-map-merge {::context   (:stillsuit/app-context decorated)
                            ::config    config
-                           ::schema    compiled
+                           ::schema    (:stillsuit/schema decorated)
                            ::query-doc queries}
                           overrides))))
 

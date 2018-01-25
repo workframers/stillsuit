@@ -70,18 +70,23 @@
   (schema/as-conformer (fn [^String k]
                          (type-convert (edn/read-string k)))))
 
-(defn transformer-map [config]
-  {:stillsuit.scalars/parse-edn        parse-edn
-   :stillsuit.scalars/serialize-str    serialize-str
-   :stillsuit.scalars/serialize-pr-str serialize-pr-str
-   :stillsuit.scalars/parse-uuid       parse-uuid
-   :stillsuit.scalars/parse-java-date  parse-java-date
-   :stillsuit.scalars/parse-bigint     (parse-as-value bigint)
-   :stillsuit.scalars/parse-bigdec     (parse-as-value bigdec)
-   :stillsuit.scalars/parse-double     (parse-as-value double)})
-
+(defn transformer-map
+  "Given a base resolver map used attach scalar transformers to a lacinia schema, attach the
+  transformers for datomic primitive types."
+  [base-map config]
+  (merge base-map
+         {:stillsuit.scalars/parse-edn        parse-edn
+          :stillsuit.scalars/serialize-str    serialize-str
+          :stillsuit.scalars/serialize-pr-str serialize-pr-str
+          :stillsuit.scalars/parse-uuid       parse-uuid
+          :stillsuit.scalars/parse-java-date  parse-java-date
+          :stillsuit.scalars/parse-bigint     (parse-as-value bigint)
+          :stillsuit.scalars/parse-bigdec     (parse-as-value bigdec)
+          :stillsuit.scalars/parse-double     (parse-as-value double)}))
 
 (defn attach-scalars
+  "Given a lacinia schema, add in the scalar transformer definitions to convert from datomic
+  types to serialized GraphQL values."
   [schema {:keys [:stillsuit/scalars] :as config}]
   (cond-> schema
     (not (:stillsuit.scalar/skip-defaults? config))
