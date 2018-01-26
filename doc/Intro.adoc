@@ -1,0 +1,59 @@
+= Introduction to stillsuit
+Tim Gilbert <tim@workframe.com>
+v0.1, 2018-01-26
+:sectanchors:
+
+`stillsuit` is a library intended to be used with lacinia and datomic.
+
+== Basic operation
+
+The main interface to stillsuit is via the `(stillsuit/decorate)` function. This
+function takes in a lacinia schema file, some maps referencing lacinia resolver
+functions, and a configuration map. It returns a compiled lacinia file and an
+application context; these parameters can be passed to `(lacinia/execute)` to
+execute GraphQL queries.
+
+[#img-overview]
+.Stillsuit Overview
+image::stillsuit-summary.png[alt=Summary diagram, width=970 height=840]
+
+In the diagram above, the library user supplies the bits in yellow and stillsuit provides the bits in green.
+
+=== Sample code
+
+Here's some sample code corresponding to the above diagram:
+
+```clojure
+(ns stillsuit-sample.seattle-manual
+  (:require [com.walmartlabs.lacinia :as lacinia]
+            [stillsuit.core :as stillsuit]
+            [datomic.api :as d]))
+
+;; Standard lacinia query definition
+(def my-schema {:objects {...} :queries {:query_name {...}}})
+
+;; Connection to datomic, which is added to the app context
+(def datomic-conn (d/connect "datomic:dev://localhost:4334/seattle"))
+
+;; Map of resolver names to resolver functions
+(def my-resolvers {:resolver/name (fn [c a v] ...)})
+
+;; Regular GraphQL query, ie from client code
+(def my-query "{ query_name { field ... } }")
+
+(defn -main [_]
+  (let [;; This options map tells stillsuit where to look for stuff
+        options   {:stillsuit/schema     my-schema
+                   :stillsuit/config     {}
+                   :stillsuit/connection (d/connect my-db-uri)
+                   :stillsuit/resolvers  my-resolvers}
+        ;; (stillsuit/decorate) is the main stillsuit interface.
+        stillsuit (stillsuit/decorate options)
+        ;; Stillsuit returns a compiled schema to the calling code
+        compiled  (:stillsuit/schema stillsuit)
+        ;; It also sets up an app context
+        context   (:stillsuit/app-context stillsuit)
+        ;; We pass these two values to (lacinia/execute) to resolve the query.
+        result    (lacinia/execute compiled my-query nil context)]
+    (println result)))
+```

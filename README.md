@@ -18,6 +18,24 @@ Note that because stillsuit relies heavily on the
 only works with "On-Prem" datomic installations using the Peer libraries.
 In particular, it is not currently usable with Datomic Cloud.
 
+## Features
+
+- Works on top of existing lacinia code and schemas
+- Defines [scalar transformers](http://lacinia.readthedocs.io/en/latest/custom-scalars.html)
+  for [datomic primitive types](https://docs.datomic.com/on-prem/schema.html#required-schema-attributes)
+- Supports [GraphQL Enums](http://lacinia.readthedocs.io/en/latest/enums.html)
+  for datomic attributes defined as keywords or
+  [`:db/ident` enums](https://docs.datomic.com/on-prem/schema.html#enums)
+- Defines lacinia [field resolver factories](http://lacinia.readthedocs.io/en/latest/resolve/attach.html#resolver-factories)
+  to resolve datomic `:db.type/ref` references
+- Defines a [default field resolver](http://lacinia.readthedocs.io/en/latest/resolve/overview.html#default-field-resolver)
+  that translates between datomic `:namespaced/keywords` and lacinia `:graphql_identifiers`
+
+The basic idea behind stillsuit is that you define a few top-level queries
+that return datomic entities or lists of entities, set up your schema to
+tell lacinia which `:db.type/ref` attributes point at which GraphQL types,
+and stillsuit handles graph traversal and field lookup for you.
+
 ## Installation
 
 Add this to project.clj, build.boot, or deps.edn:
@@ -50,3 +68,7 @@ also what the datomic libraries use).
 
 In Frank Herbert's _Dune_ novels, a stillsuit is used to retain precious
 water in the harsh desert environment of Arrakis.
+
+## TODO
+
+- Investigate https://github.com/plexus/autodoc

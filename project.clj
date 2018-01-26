@@ -25,15 +25,20 @@
 
   :plugins [[s3-wagon-private "1.3.1" :exclusions [commons-logging]]]
 
-  :repositories [["workframe-private" {:url "s3p://deployment.workframe.com/maven/releases/"
+  :repositories [["workframe-private" {:url     "s3p://deployment.workframe.com/maven/releases/"
                                        :no-auth true}]]
 
   :source-paths ["src"]
 
   :test-selectors {:watch :watch}
 
-  :codox {:metadata {:doc/format :markdown}
-          :themes [:rdash]}
+  :codox {:metadata   {:doc/format :markdown}
+          :themes     [:rdash]
+          :source-uri "https://github.com/workframers/stillsuit/blob/develop/{filepath}#L{line}"}
+
+  :asciidoctor {:sources "doc/*.adoc"
+                :format  :html5
+                :to-dir  "target/manual"}
 
   :profiles {:dev  {:plugins      [[lein-ancient "0.6.15"
                                     :exclusions [commons-logging
@@ -43,6 +48,7 @@
                                    [venantius/ultra "0.5.2" :exclusions [org.clojure/clojure]]
                                    [lein-cloverage "1.0.10"]
                                    [lein-codox "0.10.3"]
+                                   [lein-asciidoctor "0.1.14" :exclusions [org.slf4j/slf4j-api]]
                                    [com.jakemccrary/lein-test-refresh "0.22.0"]]
                     :dependencies [[vvvvalvalval/datomock "0.2.0"]
                                    [codox-theme-rdash "0.1.2"]

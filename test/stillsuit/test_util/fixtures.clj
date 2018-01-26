@@ -134,3 +134,4 @@
 
 (def once (test/join-fixtures [datomic-fixture]))
 (def each (test/join-fixtures [catch-fixture]))
+
