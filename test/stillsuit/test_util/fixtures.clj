@@ -8,7 +8,8 @@
             [yaml.core :as yaml]
             [clojure.java.io :as io]
             [com.walmartlabs.lacinia :as lacinia]
-            [clojure.tools.reader.edn :as edn]))
+            [clojure.tools.reader.edn :as edn]
+            [clojure.walk :as walk]))
 
 (def test-db-uri "datomic:mem://stillsuit-test-")
 
@@ -109,6 +110,18 @@
                            ::query-doc queries}
                           overrides))))
 
+(defn approx-floats
+  "This function is here to aid testing floating-point numbers. It walks the data structure provided
+  and converts any floating-point numbers provided into BigDecimals with the given scale (default 3)."
+  ([data]
+   (approx-floats data 3))
+  ([data ^Integer scale]
+   (walk/postwalk (fn [item]
+                    (if (float? item)
+                      (-> item bigdec (.setScale scale java.math.RoundingMode/HALF_UP))
+                      item))
+                  data)))
+
 (defn execute-query
   "Given a setup map as returned by (load-setup), execute the query defined in the associated YAML"
   ([setup query-name]
@@ -130,7 +143,8 @@
       (testing (str qname)
         (let [result     (execute-query setup qname)
               simplified (util/simplify result)]
-          (is (= expected simplified)))))))
+          (is (= (approx-floats expected)
+                 (approx-floats simplified))))))))
 
 (def once (test/join-fixtures [datomic-fixture]))
 (def each (test/join-fixtures [catch-fixture]))

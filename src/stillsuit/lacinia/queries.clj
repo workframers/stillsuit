@@ -47,7 +47,6 @@
   ^resolve/ResolverResult
   (fn unique-attribute-query-resolver-fn
     [{:stillsuit/keys [connection] :as ctx} args value]
-    (log/spy connection)
     (if-let [db (some-> connection d/db)]
       (let [arg    (some-> args vals first)
             result (datomic/get-entity-by-unique-attribute db attribute arg)]

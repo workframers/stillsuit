@@ -8,20 +8,22 @@
 (use-fixtures :each fixtures/each)
 
 (defn- get-artist-by-id
-  [{:stillsuit/keys [db]} {:keys [id]} v]
-  (some->> (d/q '[:find ?a .
-                  :in $ ?id
-                  :where [?a :artist/id ?id]]
-                db (Long/parseLong id))
-    (d/entity db)))
+  [{:stillsuit/keys [connection]} {:keys [id]} v]
+  (let [db (d/db connection)]
+    (some->> (d/q '[:find ?a .
+                    :in $ ?id
+                    :where [?a :artist/id ?id]]
+                  db (Long/parseLong id))
+      (d/entity db))))
 
 (defn- get-all-artists
-  [{:stillsuit/keys [db]} {:keys [id]} v]
-  (some->> (d/q '[:find [?a ...]
-                  :where [?a :artist/id]]
-                db)
-           (map (partial d/entity db))
-           (sort-by :artist/name)))
+  [{:stillsuit/keys [connection]} {:keys [id]} v]
+  (let [db (d/db connection)]
+    (some->> (d/q '[:find [?a ...]
+                    :where [?a :artist/id]]
+                  db)
+             (map (partial d/entity db))
+             (sort-by :artist/name))))
 
 (def music-resolver-map
   {:query/artist-by-id get-artist-by-id

@@ -57,3 +57,9 @@ Here's some sample code corresponding to the above diagram:
         result    (lacinia/execute compiled my-query nil context)]
     (println result)))
 ```
+
+== What stillsuit provides
+
+`(stillsuit/decorate)` adds a bunch of stuff to the configuration you provide to
+it before returning lacinia input data.
+
