@@ -14,14 +14,14 @@
                  [funcool/cuerdas "2.0.5"]
                  [aero "1.1.2"]
                  [io.aviso/pretty "0.1.34"]
-                 [com.walmartlabs/lacinia "0.24.0-rc-2"]
+                 [com.walmartlabs/lacinia "0.24.0"]
                  [com.datomic/datomic-pro "0.9.5656"]
                  [clojure.java-time "0.3.1"]
                  [org.clojure/tools.logging "0.4.0"]
                  [org.apache.logging.log4j/log4j-core "2.10.0"]
                  [org.apache.logging.log4j/log4j-slf4j-impl "2.10.0"]
 
-                 [org.clojure/tools.reader "1.1.1"]]
+                 [org.clojure/tools.reader "1.2.1"]]
 
   :plugins [[s3-wagon-private "1.3.1" :exclusions [commons-logging]]]
 

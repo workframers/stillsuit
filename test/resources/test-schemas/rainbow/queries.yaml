@@ -48,7 +48,6 @@ one-result:
       {:oneBigdec "123.45",
        :oneBigint "1321"
        :oneBoolean true
-       ;; TODO: java double imprecision breaks these
        :oneDouble 132.45
        :oneFloat 132.45
        :oneInstant "Mon Jan 01 11:48:13 EST 2018"
