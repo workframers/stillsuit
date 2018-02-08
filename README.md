@@ -71,6 +71,10 @@ also what the datomic libraries use).
 In Frank Herbert's _Dune_ novels, a stillsuit is used to retain precious
 water in the harsh desert environment of Arrakis.
 
+# License
+
+Licensed under the EPL 2.0, see LICENSE.txt. Copyright (c) 2018 Wiorkframe.
+
 ## TODO
 
 - Investigate https://github.com/plexus/autodoc
