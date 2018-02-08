@@ -45,7 +45,7 @@
                                                  com.fasterxml.jackson.core/jackson-annotations
                                                  com.fasterxml.jackson.core/jackson-core
                                                  com.fasterxml.jackson.core/jackson-databind]]
-                                   [venantius/ultra "0.5.2" :exclusions [org.clojure/clojure]]
+                                   ;[venantius/ultra "0.5.2" :exclusions [org.clojure/clojure]]
                                    [lein-cloverage "1.0.10"]
                                    [lein-codox "0.10.3"]
                                    [lein-shell "0.5.0"]
