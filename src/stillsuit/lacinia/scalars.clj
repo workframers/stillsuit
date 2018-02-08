@@ -4,7 +4,8 @@
             [clojure.edn :as edn])
   (:import (java.util Date UUID)
            (clojure.lang Keyword)
-           (java.time ZonedDateTime))
+           (java.time ZonedDateTime)
+           (java.text SimpleDateFormat))
   (:refer-clojure :exclude [read-string]))
 
 (def scalar-options
@@ -25,8 +26,9 @@
     ::description "A Clojure keyword value, serialized as a string."}
    :db.type/instant
    {::scalar      :JavaDate
+    ::serialize   :stillsuit.scalars/serialize-java-date
     ::parse       :stillsuit.scalars/parse-java-date
-    ::description "A java.util.Date value, serialized as a string."}
+    ::description "A java.util.Date value, serialized as an ISO-8601 string in the UTC time zone."}
    :db.type/float
    {::scalar      :JavaDouble
     ::parse       :stillsuit.scalars/parse-double
@@ -59,11 +61,23 @@
 (def serialize-pr-str
   (schema/as-conformer pr-str))
 
+(def serialize-java-date
+  (schema/as-conformer
+   (fn [^Date date]
+     (-> date
+         .toInstant
+         .toString))))
+
 (def parse-uuid
   (schema/as-conformer (fn [^String u] (UUID/fromString u))))
 
 (def parse-java-date
-  (schema/as-conformer (fn [^String d] (ZonedDateTime/parse d))))
+  (schema/as-conformer
+   (fn [^String d]
+     ;; Java time libraries, from Hell's heart I stab at thee
+     (-> (ZonedDateTime/parse d)
+         .toInstant
+         Date/from))))
 
 (defn parse-as-value
   [type-convert]
@@ -75,22 +89,23 @@
   transformers for datomic primitive types."
   [base-map config]
   (merge base-map
-         {:stillsuit.scalars/parse-edn        parse-edn
-          :stillsuit.scalars/serialize-str    serialize-str
-          :stillsuit.scalars/serialize-pr-str serialize-pr-str
-          :stillsuit.scalars/parse-uuid       parse-uuid
-          :stillsuit.scalars/parse-java-date  parse-java-date
-          :stillsuit.scalars/parse-bigint     (parse-as-value bigint)
-          :stillsuit.scalars/parse-bigdec     (parse-as-value bigdec)
-          :stillsuit.scalars/parse-double     (parse-as-value double)}))
+         {:stillsuit.scalars/parse-edn           parse-edn
+          :stillsuit.scalars/serialize-str       serialize-str
+          :stillsuit.scalars/serialize-java-date serialize-java-date
+          :stillsuit.scalars/serialize-pr-str    serialize-pr-str
+          :stillsuit.scalars/parse-uuid          parse-uuid
+          :stillsuit.scalars/parse-java-date     parse-java-date
+          :stillsuit.scalars/parse-bigint        (parse-as-value bigint)
+          :stillsuit.scalars/parse-bigdec        (parse-as-value bigdec)
+          :stillsuit.scalars/parse-double        (parse-as-value double)}))
 
 (defn attach-scalars
   "Given a lacinia schema, add in the scalar transformer definitions to convert from datomic
   types to serialized GraphQL values."
   [schema {:keys [:stillsuit/scalars] :as config}]
   (cond-> schema
-    (not (:stillsuit.scalar/skip-defaults? config))
-    (attach-overrides (-> scalar-options keys set))
+          (not (:stillsuit.scalar/skip-defaults? config))
+          (attach-overrides (-> scalar-options keys set))
 
-    (set? (:stillsuit.scalar/for-fields scalars))
-    (attach-overrides (:stillsuit.scalar/for-fields scalars))))
+          (set? (:stillsuit.scalar/for-fields scalars))
+          (attach-overrides (:stillsuit.scalar/for-fields scalars))))
