@@ -32,39 +32,10 @@
                            :rainbow/typecheck   rainbow-typecheck
                            :query/rainbow-by-id rainbow-by-id})
 
-(deftest test-music-queries
+(deftest test-rainbow-queries
   (try
     (fixtures/verify-queries!
-      ;(log/spy
       (fixtures/load-setup :rainbow rainbow-resolver-map))
 
     (catch Exception e
       (.printStackTrace e))))
-
-; hrm, compile troubles
-;(deftest test-scalars-outbound
-;  (testing "load database"
-;    (let [[schema ctx] (setup resolver-map)
-;          query  "{ rainbowById(id: 111) {
-;                      id oneString oneLong oneFloat oneInstant oneUuid oneKeyword oneBoolean oneBigdec oneBigint
-;                      oneRef { oneString } } }"
-;          result (lacinia/execute schema query nil ctx)
-;          data   (get-in result [:data :rainbowById])]
-;      (is (map? schema))
-;      (is (nil? (:errors result)))
-;      (is (some? data)))))
-;
-;(deftest test-scalars-inbound
-;  (testing "load database"
-;    (let [[schema ctx] (setup resolver-map)
-;          query  "mutation {
-;                    echo(id: 111) {
-;                      id
-;                    }
-;                  }"
-;          result (lacinia/execute schema query nil ctx)
-;          data   (get-in result [:data :rainbowById])]
-;      (log/spy result)
-;      (is (map? schema))
-;      (is (nil? (:errors result)))
-;      (is (some? data)))))

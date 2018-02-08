@@ -50,7 +50,7 @@ one-result:
        :oneBoolean true
        :oneDouble 132.45
        :oneFloat 132.45
-       :oneInstant "Mon Jan 01 11:48:13 EST 2018"
+       :oneInstant "Sun Dec 31 20:01:01 EST 2017"
        :oneKeyword ":my.keyword/value"
        :oneLong "149"
        :oneRef {:id "222"}
