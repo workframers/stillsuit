@@ -24,7 +24,7 @@ jobs:
           paths:
             - ~/.m2
             - target
-  test:
+  tests:
     <<: *docker_defaults
     steps:
       - checkout
@@ -58,16 +58,27 @@ workflows:
   version: 2
   compile_test_deploy:
     jobs:
-      - dependencies
-      - test:
+      - dependencies:
+          filters:
+            tags:
+              only: /.*/
+      - tests:
           requires:
             - dependencies
+          filters:
+            tags:
+              only: /.*/
       - docs:
           requires:
             - dependencies
+          filters:
+            tags:
+              only: /.*/
       - deploy:
           requires:
-            - test
+            - tests
           filters:
             tags:
               only: /^stillsuit-.*/
+            branches:
+              ignore: /.*/
