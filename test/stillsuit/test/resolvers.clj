@@ -14,7 +14,7 @@
                     :in $ ?id
                     :where [?a :artist/id ?id]]
                   db (Long/parseLong id))
-      (d/entity db))))
+             (d/entity db))))
 
 (defn- get-all-artists
   [{:stillsuit/keys [connection]} {:keys [id]} v]
