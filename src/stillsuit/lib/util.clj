@@ -25,19 +25,24 @@
        node))
    m))
 
-(defn load-edn-resource
+(defn load-edn-file
   "Given a filename in resources, read and parse it, returning nil if it wasn't found"
-  [resource-path]
+  [filename]
   (try
-    (with-open [r (io/reader (io/resource resource-path))]
+    (with-open [r (io/reader filename)]
       (edn/read {:readers *data-readers*} (PushbackReader. r)))
     (catch IOException e
-      (log/errorf "Couldn't open file '%s': %s" resource-path (.getMessage e))
+      (log/errorf "Couldn't open file '%s': %s" filename (.getMessage e))
       nil)
     ;; This is the undocumented exception clojure.edn throws if it gets an error parsing an edn file
     (catch RuntimeException e
-      (log/errorf "Error parsing edn file '%s': %s" resource-path (.getMessage e))
+      (log/errorf "Error parsing edn file '%s': %s" filename (.getMessage e))
       nil)))
+
+(defn load-edn-resource
+  "Given a filename in resources, read and parse it, returning nil if it wasn't found"
+  [resource-path]
+  (-> resource-path io/resource load-edn-file))
 
 ;; Adapted from deep-merge-with to handle nil values:
 ;; https://github.com/clojure/clojure-contrib/commit/19613025d233b5f445b1dd3460c4128f39218741
