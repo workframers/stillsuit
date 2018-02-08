@@ -3,9 +3,7 @@
             [clojure.tools.logging :as log]
             [clojure.edn :as edn])
   (:import (java.util Date UUID)
-           (clojure.lang Keyword)
-           (java.time ZonedDateTime)
-           (java.text SimpleDateFormat))
+           (java.time ZonedDateTime))
   (:refer-clojure :exclude [read-string]))
 
 (def scalar-options
