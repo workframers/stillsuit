@@ -59,7 +59,7 @@ workflows:
   compile_test_deploy:
     jobs:
       - dependencies
-      - clj_tests:
+      - test:
           requires:
             - dependencies
       - docs:
