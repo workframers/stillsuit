@@ -48,9 +48,33 @@
                                    [venantius/ultra "0.5.2" :exclusions [org.clojure/clojure]]
                                    [lein-cloverage "1.0.10"]
                                    [lein-codox "0.10.3"]
+                                   [lein-shell "0.5.0"]
                                    [lein-asciidoctor "0.1.14" :exclusions [org.slf4j/slf4j-api]]
                                    [com.jakemccrary/lein-test-refresh "0.22.0"]]
                     :dependencies [[vvvvalvalval/datomock "0.2.0"]
                                    [codox-theme-rdash "0.1.2"]
                                    [io.forward/yaml "1.0.6"]]}
-             :test {:resource-paths ["test/resources"]}})
+             :test {:resource-paths ["test/resources"]}}
+
+  :release-tasks [;; Make sure we're up to date
+                  ["vcs" "assert-committed"]
+                  ["shell" "git" "checkout" "develop"]
+                  ["shell" "git" "pull"]
+                  ["shell" "git" "checkout" "master"]
+                  ["shell" "git" "pull"]
+                  ;; Merge develop into master
+                  ["shell" "git" "merge" "develop"]
+                  ;; Update version to non-snapshot version, commit change to master, tag
+                  ["change" "version" "leiningen.release/bump-version" "release"]
+                  ["vcs" "commit"]
+                  ["vcs" "tag"]
+                  ;; Merge master back into develop (we'll now have the non-SNAPSHOT version)
+                  ["shell" "git" "checkout" "develop"]
+                  ["shell" "git" "merge" "master"]
+                  ;; Bump up SNAPSHOT version in develop and commit
+                  ["change" "version" "leiningen.release/bump-version" "minor"]
+                  ["vcs" "commit"]
+                  ;; All done
+                  ["shell" "echo"]
+                  ["shell" "echo" "Release tagged in master; develop bumped to ${:version}."]
+                  ["shell" "echo" "To push it, run 'git push origin develop master --tags'"]])
