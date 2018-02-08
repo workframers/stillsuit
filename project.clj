@@ -1,4 +1,4 @@
-(defproject com.workframe/stillsuit "0.1.0-SNAPSHOT"
+(defproject com.workframe/stillsuit "0.1.0"
   :description "lacinia-datomic utilities"
   :url "https://github.com/workframers/stillsuit"
   :pedantic? :warn
@@ -34,7 +34,7 @@
 
   :codox {:metadata   {:doc/format :markdown}
           :themes     [:rdash]
-          :source-uri "https://github.com/workframers/stillsuit/blob/develop/{filepath}#L{line}"}
+          :source-uri "https://github.com/workframers/stillsuit/blob/master/{filepath}#L{line}"}
 
   :asciidoctor {:sources "doc/*.adoc"
                 :format  :html5
@@ -67,7 +67,7 @@
                   ;; Update version to non-snapshot version, commit change to master, tag
                   ["change" "version" "leiningen.release/bump-version" "release"]
                   ["vcs" "commit"]
-                  ["vcs" "tag"]
+                  ["vcs" "tag" "stillsuit-" "--no-sign"]
                   ;; Merge master back into develop (we'll now have the non-SNAPSHOT version)
                   ["shell" "git" "checkout" "develop"]
                   ["shell" "git" "merge" "master"]

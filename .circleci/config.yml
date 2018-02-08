@@ -24,7 +24,7 @@ jobs:
           paths:
             - ~/.m2
             - target
-  clj_tests:
+  test:
     <<: *docker_defaults
     steps:
       - checkout
@@ -67,7 +67,7 @@ workflows:
             - dependencies
       - deploy:
           requires:
-            - clj_tests
+            - test
           filters:
             tags:
-              only: /^release-.*/
+              only: /^stillsuit-.*/
