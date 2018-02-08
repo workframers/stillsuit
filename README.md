@@ -1,5 +1,7 @@
 # stillsuit
 
+[![CircleCI](https://circleci.com/gh/workframers/stillsuit/tree/develop.svg?style=svg&circle-token=bdc3a82714767c0f8e0b7285d41fd6fffabe0d42)](https://circleci.com/gh/workframers/stillsuit/tree/develop)
+
 stillsuit is a library that provides some facilities for
 accessing [datomic](http://www.datomic.com/) databases
 from the [lacinia](https://github.com/walmartlabs/lacinia)
