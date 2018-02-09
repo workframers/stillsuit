@@ -39,9 +39,11 @@ jobs:
     steps:
       - checkout
       - <<: *restore_anchor
-      - run: lein codox
+      - run: lein with-profile +docs codox
+      - run: lein with-profile +docs asciidoctor
       - store_artifacts:
           path: target/doc
+          path: target/manual
   deploy:
     <<: *docker_defaults
     steps:
@@ -73,7 +75,7 @@ workflows:
             - dependencies
           filters:
             tags:
-              only: /.*/
+              only: /^stillsuit-.*/
       - deploy:
           requires:
             - tests
