@@ -76,8 +76,8 @@ workflows:
           filters:
             tags:
               only: /^stillsuit-.*/
-          branches:
-            ignore: /.*/
+            branches:
+              ignore: /.*/
       - deploy:
           requires:
             - tests
