@@ -1,0 +1,54 @@
+{;; Manual schema for enums
+ :enums
+ {:movement_ref
+  {:description "Maps to a ref-style datomic enum"
+   :values      [{:enum-value              :BIPED
+                  :description             "Two legs (ref)"
+                  :stillsuit/datomic-value :movement.ref/biped}
+                 {:enum-value              :BRACHIATOR
+                  :description             "Long arms (ref)"
+                  :stillsuit/datomic-value :movement.ref/brachiator}
+                 {:enum-value              :QUADROPED
+                  :description             "Four legs (ref)"
+                  :stillsuit/datomic-value :movement.ref/quadroped}]}
+  :movement_kw
+  {:description "Maps to a keyword-style datomic enum"
+   :values      [{:enum-value              :BIPED
+                  :description             "Two legs (kw)"
+                  :stillsuit/datomic-value :movement.kw/biped}
+                 {:enum-value              :BRACHIATOR
+                  :description             "Long arms (kw)"
+                  :stillsuit/datomic-value :movement.kw/brachiator}
+                 {:enum-value              :QUADROPED
+                  :description             "Four legs (kw)"
+                  :stillsuit/datomic-value :movement.kw/quadroped}]}}
+
+ :objects
+ {:Animal_Ref
+  {:description "Animal with ref enum"
+   :fields      {:id       {:type (non-null ID)}
+                 :movement {:type (non-null :movement_ref)
+                            :resolve [:stillsuit/enum
+                                      #:stillsuit{:attribute    :animal-ref/movement
+                                                  :lacinia-type :movement_ref}]}}}
+
+  :Animal_Keyword
+  {:description "Animal with keyword enum"
+   :fields      {:id       {:type (non-null ID)}
+                 :movement {:type    (non-null :movement_kw)
+                            :resolve [:stillsuit/enum
+                                      #:stillsuit{:attribute    :animal-keyword/movement
+                                                  :lacinia-type :movement_kw}]}}}}
+ :queries
+ {:kw_by_id
+  {:type    :Animal_Keyword
+   :args    {:id {:type ID}}
+   :resolve :query/kw-by-id}
+  :ref_by_id
+  {:type    :Animal_Ref
+   :args    {:id {:type ID}}
+   :resolve :query/ref-by-id}
+  :refs_by_type
+  {:type    (list (non-null :Animal_Ref))
+   :args    {:type {:type :movement_ref}}
+   :resolve :query/refs-by-type}}}

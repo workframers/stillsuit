@@ -1,0 +1,42 @@
+# See comments in test/resources/test-schemas/music/queries.yaml for details
+# This tests a keyword datomic enum value
+kw-by-id:
+  query: |-
+    {
+      kw_by_id(id: "horse") {
+        movement
+      }
+    }
+  # Note that the type comes back as the lacinia enum keyword in the response
+  response: |-
+    {:data
+     {:kw_by_id
+      {:movement :QUADROPED}}}
+
+# same as above, but using a ref enum
+ref-by-id:
+  query: |-
+    {
+      ref_by_id(id: "human") {
+        movement
+      }
+    }
+  response: |-
+    {:data
+     {:ref_by_id
+      {:movement :BIPED}}}
+
+# This tests a query resolver with an enum as input; the resolver needs to call (stillsuit/datomic-enum)
+# to translate it back to the equivalent datomic keyword.
+ref-by-type:
+  query: |-
+    {
+      refs_by_type(type: BIPED) {
+        id
+        movement
+      }
+    }
+  response: |-
+    {:data
+     {:refs_by_type
+      [{:id "human", :movement :BIPED}]}}
