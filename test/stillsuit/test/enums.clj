@@ -55,12 +55,10 @@
     (is (= :datomic/abc
            (stillsuit/datomic-enum context :etype :ABC)))))
 
-(deftest ^:watch test-enum-queries
+(deftest test-enum-queries
   (try
     (let [setup (fixtures/load-setup :enums resolver-map)]
-      ;(log/spy (::fixtures/context setup))
       (fixtures/verify-queries! setup))
 
     (catch Exception e
       (.printStackTrace e))))
-
