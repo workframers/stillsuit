@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.0] - 2018-02-14 💝
+### Added
+
+- Better datomic/lacinia enum mapping
+
 ## [0.2.0] - 2018-02-09
 ### Fixed
 
