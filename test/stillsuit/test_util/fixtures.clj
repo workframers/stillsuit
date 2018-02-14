@@ -13,7 +13,7 @@
 
 (def test-db-uri "datomic:mem://stillsuit-test-")
 
-(def all-db-names [:rainbow :music])
+(def all-db-names [:rainbow :music :enums])
 
 (def ^:private db-store (atom {}))
 

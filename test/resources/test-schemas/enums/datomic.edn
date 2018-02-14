@@ -1,0 +1,37 @@
+[[;; These entities use datomic-style lookup enums
+  {:db/ident       :animal-ref/id
+   :db/valueType   :db.type/string
+   :db/cardinality :db.cardinality/one
+   :db/unique      :db.unique/identity}
+  {:db/ident       :animal-ref/movement
+   :db/valueType   :db.type/ref
+   :db/cardinality :db.cardinality/one}
+  ;; Enum values for the above
+  {:db/ident :movement.ref/quadroped}
+  {:db/ident :movement.ref/biped}
+  {:db/ident :movement.ref/brachiator}]
+
+ [;; These entities use keyword enums
+  {:db/ident       :animal-keyword/id
+   :db/valueType   :db.type/string
+   :db/cardinality :db.cardinality/one
+   :db/unique      :db.unique/identity}
+  {:db/ident       :animal-keyword/movement
+   :db/valueType   :db.type/keyword
+   :db/cardinality :db.cardinality/one}]
+
+ ;; Ref enums. Note that these fields are refs to :db/ident values.
+ [{:animal-ref/id       "horse"
+   :animal-ref/movement :movement.ref/quadroped}
+  {:animal-ref/id       "human"
+   :animal-ref/movement :movement.ref/biped}
+  {:animal-ref/id       "monkey"
+   :animal-ref/movement :movement.ref/brachiator}]
+
+ ;; Keyword enums. These fields are :db.type/keyword values, not refs.
+ [{:animal-keyword/id       "horse"
+   :animal-keyword/movement :movement.kw/quadroped}
+  {:animal-keyword/id       "human"
+   :animal-keyword/movement :movement.kw/biped}
+  {:animal-keyword/id       "monkey"
+   :animal-keyword/movement :movement.kw/brachiator}]]

@@ -63,3 +63,37 @@ Here's some sample code corresponding to the above diagram:
 `(stillsuit/decorate)` adds a bunch of stuff to the configuration you provide to
 it before returning lacinia input data.
 
+= Documentation TODOS
+
+* stillsuit/decorate (API)
+** adding stuff to app-context
+* config file
+** sample config or link to one
+** loading the config
+* how to write queries
+** getting a db
+** returning entities or entity lists
+** sample query resolver for a single-entity
+** sample for a multiple-entity query
+** sort order of results
+* writing mutations
+** getting a connection
+** return an entity
+** sample "create a thing" mutation
+** sample "update a thing" mutation
+* entity resolvers
+** how to specify them
+** options
+** specifying backrefs
+* default resolver
+** lacinia to datomic name translation
+* scalars
+** what's covered
+** keywords
+** dealing with time
+** sample queries with args
+* enums
+** the two enum flavors
+** specifying enums in the config file
+** resolving lacinia enums to datomic keywords
+** using the enum resolver
