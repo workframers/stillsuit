@@ -44,6 +44,7 @@
                                       [com.jakemccrary/lein-test-refresh "0.22.0"]]
                        :dependencies [[vvvvalvalval/datomock "0.2.0"]
                                       [io.forward/yaml "1.0.6"]
+                                      [com.workframe/still-suit-test "0.1.0-SNAPSHOT"]
                                       [org.apache.logging.log4j/log4j-core "2.10.0"]
                                       [org.apache.logging.log4j/log4j-slf4j-impl "2.10.0"]
                                       [com.datomic/datomic-pro "0.9.5656"
