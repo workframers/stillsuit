@@ -46,13 +46,17 @@
   as :db.unique/identity. Return the namespace of that attribute as a string."
   [entity]
   (when entity
-    (let [db     (d/entity-db entity)
+    (let [db (d/entity-db entity)
           unique (fn [attr-kw]
                    (let [attr-ent (d/entity db attr-kw)]
                      (when (some? (:db/unique attr-ent))
-                       attr-kw)))]
-      (some->> entity
-               keys
-               (remove #(= (namespace %) "db"))
-               (some unique)
-               namespace))))
+                       attr-kw)))
+          unique-attribute (some->> entity
+                              keys
+                              (remove #(= (namespace %) "db"))
+                              (some unique))]
+      (if (some? unique-attribute)
+          (namespace unique-attribute)
+          (do (log/warnf "Could not find unique attribute for:\n%s\nField resolution probably won't work!!"
+                         (d/touch entity))
+              nil)))))
