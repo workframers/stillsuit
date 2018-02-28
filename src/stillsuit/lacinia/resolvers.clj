@@ -42,8 +42,8 @@
     (sort-by keyfn comparator entity-set)))
 
 (defn- ensure-single
-  "Resolve a reference attribute whose resolver was tagged with :stillsuit/single?. Return
-  a pair [value errors]. The error condition occurs if an attribute marked as single results
+  "Resolve a reference attribute whose resolver has :stillsuit/cardinality set to :stillsuit.cardinality/one.
+  Return a pair [value errors]. The error condition occurs if an attribute marked as single results
   in more than one result."
   [opts entity-set]
   (if (> (count entity-set) 1)
@@ -54,18 +54,34 @@
     ;; Else one or zero entities
     [(first entity-set) nil]))
 
+(defmulti ensure-cardinality (fn [_ opts] (:stillsuit/cardinality opts)))
+
+(defmethod ensure-cardinality nil [value opts]
+  (if (set? value)
+      [(entity-sort opts value) nil]
+      [value nil]))
+
+(defmethod ensure-cardinality :stillsuit.cardinality/many [value opts]
+  (cond
+    (nil? value) [[] nil]
+    (set? value) [(entity-sort opts value) nil]
+    :else  [[]
+            {:message (format "Expected many results resolving attribute %s, but found: %s"
+                              (:stillsuit/attribute opts) value)}]))
+
+(defmethod ensure-cardinality :stillsuit.cardinality/one [value opts]
+  (if (set? value)
+    (ensure-single opts value)
+    [value nil]))
+
 (defn ref-resolver
   "Resolver used to get a literal attribute value out of an entity, eg in
   :resolve [:stillsuit/attribute {:stillsuit/attribute :artist/_country}]"
-  [{:stillsuit/keys [attribute lacinia-type single?] :as opts}]
+  [{:stillsuit/keys [attribute lacinia-type] :as opts}]
   ^resolve/ResolverResult
   (fn [context args entity]
     (let [value (get entity attribute)
-          [sorted errs] (if (set? value)
-                          (if single?
-                            (ensure-single opts value)
-                            [(entity-sort opts value) nil])
-                          [value nil])]
+          [sorted errs] (ensure-cardinality value opts)]
       (resolve/resolve-as
         (schema/tag-with-type sorted lacinia-type)
         errs))))

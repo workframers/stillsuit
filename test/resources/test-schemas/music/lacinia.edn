@@ -24,14 +24,14 @@
                  :tracks {:type (list (non-null :Track))}
 
                  ;; This resolver factory tells stillsuit to use the `:artist/_albums`
-                 ;; backreference to go from an album to its artist. The `:stillsuit/single?`
-                 ;; key tells stillsuit to return a single attribute, rather than a List of them.
-                 ;; An error will be returned if more than one result is found.
+                 ;; backreference to go from an album to its artist. The `:stillsuit/cardinality`
+                 ;; key with value :stillsuit.cardinality/one tells stillsuit to return a single
+                 ;; attribute, rather than a List of them. An error will be returned if more than one result is found.
                  :artist {:type    (non-null :Artist)
                           :resolve [:stillsuit/ref
                                     #:stillsuit{:attribute    :artist/_albums
                                                 :lacinia-type :Artist
-                                                :single?      true}]}}}
+                                                :cardinality  :stillsuit.cardinality/one}]}}}
 
   :Track
   {:description "Track"
