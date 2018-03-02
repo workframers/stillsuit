@@ -8,6 +8,9 @@
   {:db/ident       :rainbow/one-keyword
    :db/valueType   :db.type/keyword
    :db/cardinality :db.cardinality/one}
+  {:db/ident       :rainbow/two-keyword
+   :db/valueType   :db.type/keyword
+   :db/cardinality :db.cardinality/one}
   {:db/ident       :rainbow/one-string
    :db/valueType   :db.type/string
    :db/cardinality :db.cardinality/one}
@@ -35,6 +38,9 @@
   {:db/ident       :rainbow/one-instant
    :db/valueType   :db.type/instant
    :db/cardinality :db.cardinality/one}
+  {:db/ident       :rainbow/two-instant
+   :db/valueType   :db.type/instant
+   :db/cardinality :db.cardinality/one}
   {:db/ident       :rainbow/one-uuid
    :db/valueType   :db.type/uuid
    :db/cardinality :db.cardinality/one}
@@ -49,6 +55,7 @@
  [{:db/id               "one"
    :rainbow/id          111
    :rainbow/one-keyword :my.keyword/value
+   :rainbow/two-keyword :my.keyword/value
    :rainbow/one-string  "One string"
    :rainbow/one-boolean true
    :rainbow/one-long    149
@@ -57,11 +64,13 @@
    :rainbow/one-double  132.45
    :rainbow/one-bigdec  123.45M
    :rainbow/one-instant #inst "2018-01-01T01:01:01Z"
+   :rainbow/two-instant #inst "2018-01-01T01:01:01Z"
    :rainbow/one-uuid    #uuid "fcc81e3e-f301-11e7-8a4d-4762cfbddccf"
    :rainbow/one-ref     "two"}
   {:db/id               "two"
    :rainbow/id          222
    :rainbow/one-keyword :my.keyword/value
+   :rainbow/two-keyword :my.keyword/value
    :rainbow/one-string  "Two string"
    :rainbow/one-boolean true
    :rainbow/one-long    249
@@ -70,5 +79,6 @@
    :rainbow/one-double  232.45
    :rainbow/one-bigdec  223.45M
    :rainbow/one-instant #inst "2018-02-02T02:02:02Z"
+   :rainbow/two-instant #inst "2018-02-02T02:02:02Z"
    :rainbow/one-uuid    #uuid "796ddd5e-f3b4-11e7-82d5-0747e98878c6"}]]
 ;:rainbow/one-uri     #java.net.URI["https://clojure.org"]}]]

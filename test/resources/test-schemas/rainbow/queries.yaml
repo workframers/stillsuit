@@ -5,6 +5,7 @@ nil-result:
       rainbowById(id: 7777) {
         oneString
         oneKeyword
+        twoKeyword
         oneBoolean
         oneLong
         oneBigint
@@ -29,6 +30,7 @@ one-result:
       rainbowById(id: 111) {
         oneString
         oneKeyword
+        twoKeyword
         oneBoolean
         oneLong
         oneBigint
@@ -36,6 +38,7 @@ one-result:
         oneDouble
         oneBigdec
         oneInstant
+        twoInstant
         oneUuid
         oneRef {
           id
@@ -51,7 +54,9 @@ one-result:
        :oneDouble 132.45
        :oneFloat 132.45
        :oneInstant "2018-01-01T01:01:01Z"
+       :twoInstant "1514768461000"
        :oneKeyword ":my.keyword/value"
+       :twoKeyword "my.keyword/value"
        :oneLong "149"
        :oneRef {:id "222"}
        :oneString "One string"
@@ -104,3 +109,15 @@ typecheck_double2:
     { typecheck_double(value: "12", expected: "12.34") }
   response: |-
     {:data {:typecheck_double true}}
+
+typecheck_epoch_ms:
+  query: |-
+    { typecheck_epoch_ms(value: "1234567890", expected: "#inst \"2018-01-01T01:01:01Z\"") }
+  response: |-
+    {:data {:typecheck_epoch_ms true}}
+
+typecheck_iso8601:
+  query: |-
+    { typecheck_iso8601(value: "2018-01-01T01:01:01Z", expected: "#inst \"2018-01-01T01:01:01Z\"") }
+  response: |-
+    {:data {:typecheck_iso8601 true}}

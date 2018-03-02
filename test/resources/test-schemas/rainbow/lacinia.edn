@@ -20,14 +20,16 @@
   {:description "I've got one of everything"
    :fields      {:id         {:type ID}
                  :oneString  {:type String}
-                 :oneKeyword {:type :ClojureKeyword}
+                 :oneKeyword {:type :ClojureKeywordWithColon}
+                 :twoKeyword {:type :ClojureKeyword}
                  :oneBoolean {:type Boolean}
                  :oneLong    {:type :JavaLong}
                  :oneBigint  {:type :JavaBigInt}
                  :oneFloat   {:type Float}
                  :oneDouble  {:type Float}
                  :oneBigdec  {:type :JavaBigDec}
-                 :oneInstant {:type :JavaDate}
+                 :oneInstant {:type :Iso8601Date}
+                 :twoInstant {:type :EpochMillisecs}
                  :oneUuid    {:type :JavaUUID}
                  :oneRef     {:type :Rainbow}}}}
  :queries
@@ -74,26 +76,16 @@
   {:type    (non-null Boolean)
    :args    {:value    {:type (non-null :JavaDouble)}
              :expected {:type (non-null String)}}
+   :resolve :rainbow/typecheck}
+
+  :typecheck_epoch_ms
+  {:type    (non-null Boolean)
+   :args    {:value    {:type (non-null :EpochMillisecs)}
+             :expected {:type (non-null String)}}
+   :resolve :rainbow/typecheck}
+
+  :typecheck_iso8601
+  {:type    (non-null Boolean)
+   :args    {:value    {:type (non-null :Iso8601Date)}
+             :expected {:type (non-null String)}}
    :resolve :rainbow/typecheck}}}
-
-  ;:echo_double
-  ;{:type    :JavaBigDec
-  ; :args    {:id {:type :JavaBigDec}}
-  ; :resolve :rainbow/identity}
-  ;
-  ;:echo_instant
-  ;{:type    :JavaDate
-  ; :args    {:id {:type :JavaDate}}
-  ; :resolve :rainbow/identity}}}
-
-
-;:mutations
-;{:echo
-; {:type        :Rainbow
-;  :description "Return input"
-;  :args        {:keyword {:type :ClojureKeyword}
-;                :uuid    {:type :JavaUUID}
-;                :date    {:type :JavaDate}
-;                :bigdec  {:type :JavaBigDec}
-;                :bigint  {:type :JavaBigInt}}
-;  :resolve     :mutation/echo}}}}
