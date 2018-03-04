@@ -73,7 +73,7 @@ water in the harsh desert environment of Arrakis.
 
 # License
 
-Licensed under the EPL 2.0, see LICENSE.txt. Copyright (c) 2018 Wiorkframe.
+Licensed under the EPL 2.0, see LICENSE.txt. Copyright (c) 2018 Workframe.
 
 ## TODO
 
