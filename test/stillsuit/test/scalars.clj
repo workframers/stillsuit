@@ -19,6 +19,8 @@
   (let [val-type    (type value)
         expect-val  (edn/read-string expected)
         expect-type (type expect-val)]
+    (when (not= val-type expect-type)
+      (log/warnf "Typecheck failed: expected %s, got %s" (str expect-type) (str val-type)))
     (= val-type expect-type)))
 
 (defn- rainbow-by-id [{:keys [:stillsuit/connection]} {:keys [id]} _]
@@ -35,7 +37,7 @@
 (deftest test-rainbow-queries
   (try
     (fixtures/verify-queries!
-      (fixtures/load-setup :rainbow rainbow-resolver-map))
+     (fixtures/load-setup :rainbow rainbow-resolver-map))
 
     (catch Exception e
       (.printStackTrace e))))

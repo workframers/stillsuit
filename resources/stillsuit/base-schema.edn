@@ -1,0 +1,43 @@
+;; Base stillsuit config file. The schema passed to (stillsuit/decorate) is deep-merged
+;; over this file.
+{:stillsuit/version
+ "0.5.0"
+
+ ;; Scalar definitions - see stillsuit.lacinia.scalars for their implementations
+ :scalars
+ {:JavaBigDec
+  {:description "A Java BigDecimal value, serialized as a string."
+   :parse       :stillsuit.parse/bigdec
+   :serialize   :stillsuit.serialize/str}
+  :JavaBigInt
+  {:description "A Java BigInteger value, serialized as a string."
+   :parse       :stillsuit.parse/bigint
+   :serialize   :stillsuit.serialize/str}
+  :JavaLong
+  {:description "A Java long value, serialized as a string (because it can be more than 32 bits)."
+   :parse       :stillsuit.parse/long
+   :serialize   :stillsuit.serialize/str}
+  :ClojureKeyword
+  {:description "A Clojure keyword value, serialized as a string omitting the leading colon."
+   :parse       :stillsuit.parse/keyword
+   :serialize   :stillsuit.serialize/keyword-no-colon}
+  :ClojureKeywordWithColon
+  {:description "A Clojure keyword value, serialized as a string including the leading colon."
+   :parse       :stillsuit.parse/keyword
+   :serialize   :stillsuit.serialize/keyword-with-colon}
+  :Iso8601Date
+  {:description "A java.util.Date value, serialized as an ISO-8601 string in the UTC time zone."
+   :parse       :stillsuit.parse/iso8601
+   :serialize   :stillsuit.serialize/iso8601}
+  :EpochMillisecs
+  {:description "A java.util.Date value, serialized as the number of milliseconds since the UTC epoch."
+   :parse       :stillsuit.parse/epoch-millisecs
+   :serialize   :stillsuit.serialize/epoch-millisecs}
+  :JavaDouble
+  {:description "A Java double or float value, serialized as a string."
+   :parse       :stillsuit.parse/double
+   :serialize   :stillsuit.serialize/str}
+  :JavaUUID
+  {:description "A java.util.UUID value, serialized as a string."
+   :parse       :stillsuit.parse/uuid
+   :serialize   :stillsuit.serialize/str}}}

@@ -3,12 +3,13 @@
             [stillsuit.lacinia.scalars :as ss]
             [stillsuit.lacinia.resolvers :as sr]
             [stillsuit.lacinia.enums :as se]
+            [stillsuit.lib.util :as slu]
             [datomic.api :as d]
             [com.walmartlabs.lacinia.schema :as schema]
             [clojure.tools.logging :as log]
             [com.walmartlabs.lacinia.util :as util]))
 
-(defn datomic-connect
+(defn- datomic-connect
   [db-uri]
   (if-not db-uri
     (log/error "No datomic URL defined in config or schema!")
@@ -16,8 +17,7 @@
       (log/infof "Connecting to datomic at %s..." db-uri)
       conn)))
 
-
-(defn make-app-context
+(defn- make-app-context
   "Return an app-context map suitable for handing to (lacinia/execute-query)."
   [base-context schema connection enum-map config]
   (let [context-conn (or connection (datomic-connect (or (:catchpocket/datomic-uri config)
@@ -27,24 +27,17 @@
             :stillsuit/config     config}
            base-context)))
 
-(def default-config
-  {:stillsuit/datomic-entity-type     :DatomicEntity
-   :stillsuit/entity-id-query-name    :entity_by_eid
-   :stillsuit/query-by-unique-id-name :entity_by_unique_id
-   :stillsuit/no-default-resolver?    false
-   :stillsuit/no-scalars?             false
-   :stillsuit/compile?                true})
+(defn- decorate-resolver-map
+  [resolver-map config]
+  (merge resolver-map
+         (sr/resolver-map config)
+         (sq/resolver-map config)))
 
-(defn decorate-resolver-map
-  ([resolver-map]
-   (decorate-resolver-map resolver-map nil))
-  ([resolver-map options]
-   (let [with-defaults (merge default-config options)]
-     (merge resolver-map
-            (sr/resolver-map with-defaults)
-            (sq/resolver-map with-defaults)))))
+(def ^:private base-schema
+  (delay (slu/load-edn-resource "stillsuit/base-schema.edn")))
 
-;; TODO: specs
+(def ^:private default-config-schema
+  (delay (slu/load-edn-resource "stillsuit/config-defaults.edn")))
 
 (defn datomic-enum
   "Given a stillsuit-decorated app context and a keyword representing a lacinia enum which has
@@ -60,9 +53,9 @@
   "Main interface to stillsuit. Accepts a map containing various parameters as input; returns
   a map with an app context and a schema."
   [{:stillsuit/keys [schema config resolvers transformers context connection]}]
-  (let [opts         (merge default-config config)
-        uncompiled   (-> schema
-                         (ss/attach-scalars opts)
+  (let [opts         (merge @default-config-schema config)
+        uncompiled   (-> @base-schema
+                         (slu/deep-map-merge schema)
                          (sq/attach-queries opts)
                          (sr/attach-resolvers opts)
                          (util/attach-resolvers (decorate-resolver-map resolvers opts))

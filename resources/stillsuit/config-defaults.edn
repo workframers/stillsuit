@@ -1,0 +1,8 @@
+;; Default stillsuit configuration options. Any options passed to `(stillsuit/decorate)`
+;; will be deep-merged on top of this default map.
+{:stillsuit/datomic-entity-type     :DatomicEntity
+ :stillsuit/entity-id-query-name    :entity_by_eid
+ :stillsuit/query-by-unique-id-name :entity_by_unique_id
+ :stillsuit/no-default-resolver?    false
+ :stillsuit/no-scalars?             false
+ :stillsuit/compile?                true}
