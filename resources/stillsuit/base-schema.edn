@@ -1,7 +1,7 @@
 ;; Base stillsuit config file. The schema passed to (stillsuit/decorate) is deep-merged
 ;; over this file.
 {:stillsuit/version
- "0.5.0"
+ "0.6.0"
 
  ;; Scalar definitions - see stillsuit.lacinia.scalars for their implementations
  :scalars
