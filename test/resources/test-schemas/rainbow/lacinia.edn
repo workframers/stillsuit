@@ -23,6 +23,14 @@
                  :oneKeyword {:type :ClojureKeywordWithColon}
                  :twoKeyword {:type :ClojureKeyword}
                  :oneBoolean {:type Boolean}
+
+                 ;; Following uses a ref resolver to test boolean coercion. Because the
+                 ;; :lacinia-type argument is 'Boolean, entities with missing attribute
+                 ;; values for this field return false for the value.
+                 :twoBoolean {:type    (non-null Boolean)
+                              :resolve [:stillsuit/ref
+                                        #:stillsuit{:attribute    :rainbow/two-boolean
+                                                    :lacinia-type Boolean}]}
                  :oneLong    {:type :JavaLong}
                  :oneBigint  {:type :JavaBigInt}
                  :oneFloat   {:type Float}

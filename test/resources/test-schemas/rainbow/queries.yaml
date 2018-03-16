@@ -121,3 +121,18 @@ typecheck_iso8601:
     { typecheck_iso8601(value: "2018-01-01T01:01:01Z", expected: "#inst \"2018-01-01T01:01:01Z\"") }
   response: |-
     {:data {:typecheck_iso8601 true}}
+
+# This query tests coercion of missing attributes to false (this entity doesn't have a value
+# for two-boolean, but we don't want to return nil).
+bool-coercion:
+  query: |-
+    {
+      rainbowById(id: 111) {
+        twoBoolean
+      }
+    }
+  response: |-
+    {:data
+     {:rainbowById
+      {:twoBoolean false}}}
+

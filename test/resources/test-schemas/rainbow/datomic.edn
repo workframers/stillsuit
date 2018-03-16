@@ -17,6 +17,9 @@
   {:db/ident       :rainbow/one-boolean
    :db/valueType   :db.type/boolean
    :db/cardinality :db.cardinality/one}
+  {:db/ident       :rainbow/two-boolean
+   :db/valueType   :db.type/boolean
+   :db/cardinality :db.cardinality/one}
   {:db/ident       :rainbow/one-long
    :db/valueType   :db.type/long
    :db/cardinality :db.cardinality/one}
