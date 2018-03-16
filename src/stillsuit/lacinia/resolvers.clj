@@ -29,10 +29,7 @@
   [entity graphql-field-name options]
   (let [attr-kw (graphql-field->datomic-attribute entity graphql-field-name options)
         value   (get entity attr-kw)]
-    ;(log/spy [entity graphql-field-name attr-kw value])
     (log/tracef "Resolved graphql field '%s' as %s, value %s" graphql-field-name attr-kw value)
-    ;(if (instance? java.util.Date value)
-    ;  (date-time-result value)
     value))
 
 (defn- entity-sort
@@ -54,25 +51,36 @@
     ;; Else one or zero entities
     [(first entity-set) nil]))
 
-(defmulti ensure-cardinality (fn [_ opts] (:stillsuit/cardinality opts)))
+(defmulti ^:private ensure-cardinality
+  "Based on the stillsuit options for a given ref field, ensure that it is either a
+  single entity (for :stillsuit.cardinality/one) or a list of entities
+  (for :stillsuit.cardinality/many)."
+  (fn [_ opts] (:stillsuit/cardinality opts)))
 
 (defmethod ensure-cardinality nil [value opts]
   (if (set? value)
-      [(entity-sort opts value) nil]
-      [value nil]))
+    [(entity-sort opts value) nil]
+    [value nil]))
 
 (defmethod ensure-cardinality :stillsuit.cardinality/many [value opts]
   (cond
     (nil? value) [[] nil]
     (set? value) [(entity-sort opts value) nil]
-    :else  [[]
-            {:message (format "Expected many results resolving attribute %s, but found: %s"
-                              (:stillsuit/attribute opts) value)}]))
+    :else [[]
+           {:message (format "Expected many results resolving attribute %s, but found: %s"
+                             (:stillsuit/attribute opts) value)}]))
 
 (defmethod ensure-cardinality :stillsuit.cardinality/one [value opts]
   (if (set? value)
     (ensure-single opts value)
     [value nil]))
+
+(defmulti ^:private ensure-type
+  "Coerce the given datomic primitive value to be the same as the given lacinia type.
+  Currently this just converts `nil` values to `false` for Boolean fields."
+  (fn [value lacinia-type] lacinia-type))
+(defmethod ensure-type :default [value _] value)
+(defmethod ensure-type 'Boolean [value _] (true? value))
 
 (defn ref-resolver
   "Resolver used to get a literal attribute value out of an entity, eg in
@@ -80,11 +88,11 @@
   [{:stillsuit/keys [attribute lacinia-type] :as opts}]
   ^resolve/ResolverResult
   (fn [context args entity]
-    (let [value (get entity attribute)
+    (let [value (ensure-type (get entity attribute) lacinia-type)
           [sorted errs] (ensure-cardinality value opts)]
       (resolve/resolve-as
-        (schema/tag-with-type sorted lacinia-type)
-        errs))))
+       (schema/tag-with-type sorted lacinia-type)
+       errs))))
 
 (defn enum-resolver
   "Resolver used to get an attribute value for a lacinia enum type. This uses the :stillsuit/enum-map
@@ -101,7 +109,7 @@
         (log/warnf "Unable to find mapping for datomic enum value %s for type %s, attribute %s!"
                    value lacinia-type attribute))
       (resolve/resolve-as
-        (schema/tag-with-type (or mapped value) lacinia-type)))))
+       (schema/tag-with-type (or mapped value) lacinia-type)))))
 
 (defn datomic-entity-interface
   [config]
@@ -120,11 +128,10 @@
   ^resolve/ResolverResult
   (fn [{:keys [:stillsuit/config]} args value]
     (resolve/resolve-as
-      (if (sd/entity? value)
-        (get-graphql-value value field-name config)
-        (get value field-name)))))
+     (if (sd/entity? value)
+       (get-graphql-value value field-name config)
+       (get value field-name)))))
 
 (defn resolver-map [config]
   {:stillsuit/ref  ref-resolver
    :stillsuit/enum enum-resolver})
-

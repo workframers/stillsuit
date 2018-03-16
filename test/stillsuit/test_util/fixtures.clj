@@ -107,6 +107,7 @@
      (util/deep-map-merge {::context   (:stillsuit/app-context decorated)
                            ::config    config
                            ::schema    (:stillsuit/schema decorated)
+                           ::decorated decorated
                            ::query-doc queries}
                           overrides))))
 
@@ -122,14 +123,14 @@
                       item))
                   data)))
 
-(defn execute-query
+(defn execute-named-query
   "Given a setup map as returned by (load-setup), execute the query defined in the associated YAML"
   ([setup query-name]
-   (execute-query setup query-name nil))
-  ([{::keys [context schema query-doc]} query-name variables]
-   (let [query (get-in query-doc [query-name :query])]
+   (execute-named-query setup query-name nil))
+  ([setup query-name variables]
+   (let [query (get-in setup [::query-doc query-name :query])]
      (is (some? query))
-     (lacinia/execute schema query variables context))))
+     (stillsuit/execute (::decorated setup) query variables))))
 
 (defn verify-queries!
   "Given a setup map returned by load-setup, run through every query in the queries.yaml file,
@@ -141,11 +142,10 @@
             :when [response-str]
             :let [expected (edn/read-string response-str)]]
       (testing (str qname)
-        (let [result     (execute-query setup qname)
+        (let [result     (execute-named-query setup qname)
               simplified (util/simplify result)]
           (is (= (approx-floats expected)
                  (approx-floats simplified))))))))
 
 (def once (test/join-fixtures [datomic-fixture]))
 (def each (test/join-fixtures [catch-fixture]))
-

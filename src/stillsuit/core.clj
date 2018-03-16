@@ -5,6 +5,7 @@
             [stillsuit.lacinia.enums :as se]
             [stillsuit.lib.util :as slu]
             [datomic.api :as d]
+            [com.walmartlabs.lacinia :as lacinia]
             [com.walmartlabs.lacinia.schema :as schema]
             [clojure.tools.logging :as log]
             [com.walmartlabs.lacinia.util :as util]))
@@ -70,3 +71,12 @@
       (log/spy :trace uncompiled))
     {:stillsuit/schema      compiled
      :stillsuit/app-context (make-app-context context schema connection enum-map opts)}))
+
+(defn execute
+  "Convenience function to take the result of (decorate) and execute a query against it."
+  ([stillsuit-result query]
+   (execute stillsuit-result query nil))
+  ([stillsuit-result query variables]
+   (let [schema  (:stillsuit/schema stillsuit-result)
+         context (:stillsuit/app-context stillsuit-result)]
+     (lacinia/execute schema query variables context))))
