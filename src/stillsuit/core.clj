@@ -53,7 +53,7 @@
   "Main interface to stillsuit. Accepts a map containing various parameters as input; returns
   a map with an app context and a schema."
   [{:stillsuit/keys [schema config resolvers transformers context connection]}]
-  (let [opts         (merge @default-config-schema config)
+  (let [opts         (merge @default-config-schema (:stillsuit/config schema) config)
         uncompiled   (-> @base-schema
                          (slu/deep-map-merge schema)
                          (sq/attach-queries opts)

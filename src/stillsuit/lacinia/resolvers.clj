@@ -107,7 +107,7 @@
   [config]
   (let [db-id (:stillsuit/db-id-name config :dbId)]
     {:description "Base type for datomic entities"
-     :fields      {db-id {:type        'ID
+     :fields      {db-id {:type        :JavaLong
                           :description "The entity's EID (as a string)"}}}))
 
 (defn attach-resolvers [schema config]
