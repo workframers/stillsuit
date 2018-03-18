@@ -13,9 +13,9 @@
 (defn coerce-to-datomic-type
   "Given an input value as a string (lacinia type 'ID) and a datomic value type,
   coerce the input to the proper type."
-  [input datomic-type]
+  [^String input datomic-type]
   (let [xform (case datomic-type
-                :db.type/string str
+                :db.type/string identity
                 :db.type/instant #(java.util.Date/parse %)
                 :db.type/bigdec bigdec
                 :db.type/bigint bigint
@@ -23,7 +23,10 @@
                 :db.type/int #(Integer/parseInt %)
                 :db.type/keyword keyword
                 :db.type/uuid #(UUID/fromString %)
-                (constantly nil))] ; todo: should throw
+                (do
+                  (log/errorf "Unknown datomic type %s encountered, returning '%s' as string"
+                              datomic-type input)
+                  identity))]
     (xform input)))
 
 (defn get-entity-by-eid
@@ -33,7 +36,9 @@
 (defn get-entity-by-unique-attribute
   [db attribute-ident value]
   (if-let [attr-ent (d/entity db [:db/ident attribute-ident])]
-    (if-let [coerced (coerce-to-datomic-type value (:db/valueType attr-ent))]
+    (if-let [coerced (if (string? value)
+                       (coerce-to-datomic-type value (:db/valueType attr-ent))
+                       value)]
       (d/entity db [attribute-ident coerced])
       ;; Else coercion failed
       (log/warnf "Unable to coerce input '%s' to type %s in (get-entity-by-unique-attribute %s)"
@@ -46,17 +51,17 @@
   as :db.unique/identity. Return the namespace of that attribute as a string."
   [entity]
   (when entity
-    (let [db (d/entity-db entity)
-          unique (fn [attr-kw]
-                   (let [attr-ent (d/entity db attr-kw)]
-                     (when (some? (:db/unique attr-ent))
-                       attr-kw)))
+    (let [db               (d/entity-db entity)
+          unique           (fn [attr-kw]
+                             (let [attr-ent (d/entity db attr-kw)]
+                               (when (some? (:db/unique attr-ent))
+                                 attr-kw)))
           unique-attribute (some->> entity
-                              keys
-                              (remove #(= (namespace %) "db"))
-                              (some unique))]
+                                    keys
+                                    (remove #(= (namespace %) "db"))
+                                    (some unique))]
       (if (some? unique-attribute)
-          (namespace unique-attribute)
-          (do (log/warnf "Could not find unique attribute for:\n%s\nField resolution probably won't work!!"
-                         (d/touch entity))
-              nil)))))
+        (namespace unique-attribute)
+        (do (log/warnf "Could not find unique attribute for:\n%s\nField resolution probably won't work!!"
+                       (d/touch entity))
+            nil)))))
