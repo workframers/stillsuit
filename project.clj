@@ -1,14 +1,14 @@
 (defproject com.workframe/stillsuit "0.8.0-SNAPSHOT"
-  :description "lacinia-datomic utilities"
+  :description "lacinia-datomic interface library"
   :url "https://github.com/workframers/stillsuit"
   :pedantic? :warn
   :min-lein-version "2.8.1"
-  :license {:name "EPL"
-            :url  "http://www.eclipse.org/legal/epl-v10.html"}
+  :license {:name "Apache 2.0"
+            :url  "https://www.apache.org/licenses/LICENSE-2.0"}
 
   :dependencies [[org.clojure/clojure "1.9.0"]
                  [org.clojure/core.async "0.4.474"]
-                 [org.clojure/tools.cli "0.3.5"]
+                 [org.clojure/tools.cli "0.3.6"]
                  [mvxcvi/puget "1.0.2"]
                  [fipp "0.6.12"]
                  [funcool/cuerdas "2.0.5"]
@@ -34,9 +34,9 @@
           :themes     [:rdash]
           :source-uri "https://github.com/workframers/stillsuit/blob/master/{filepath}#L{line}"}
 
-  :asciidoctor {:sources "doc/*.adoc"
-                :format  :html5
-                :to-dir  "target/manual"}
+  :asciidoctor [{:sources "doc/manual/*.adoc"
+                 :format  :html5
+                 :to-dir  "target/manual"}]
 
   :profiles {:dev     {:plugins      [[lein-cloverage "1.0.10"]
                                       [lein-shell "0.5.0"]

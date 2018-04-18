@@ -43,8 +43,20 @@ and stillsuit handles graph traversal and field lookup for you.
 Add this to project.clj, build.boot, or deps.edn:
 
 ```
-[com.workframe/stillsuit "0.1.0-SNAPSHOT"]
+[com.workframe/stillsuit "0.6.0"]
 ```
+
+Note that stillsuit assumes that you have the datomic peer libraries in
+your local maven repository.
+
+## Documentation
+
+The docs are sparse, but you can find a
+[user manual](http://docs.workframe.com/stillsuit/current/manual/) and
+[API docuemntation](http://docs.workframe.com/stillsuit/current/doc/) online.
+
+There is a [slide deck here](http://docs.workframe.com/catchpocket/current/slides/)
+discussion stillsuit and catchpocket.
 
 ## Usage
 
@@ -54,9 +66,10 @@ etc, and then optionally compile it for you.
 
 ### Using with catchpocket
 
-stillsuit should be usable with a manually-written schema file, but you
-can also use the catchpocket project to inspect your datomic database and
-automatically generate large parts of a schema file for you.
+stillsuit is usable with a manually-written schema file, but you
+can also use the [catchpocket](https://github.com/workframers/catchpocket)
+project to scan your datomic database and automatically generate large
+parts of a schema file for you.
 
 In the ideal scenario, catchpocket can generate all of your object
 definitions for you, leaving only the top-level queries for you to write.
@@ -77,6 +90,8 @@ Copyright © 2018 Workframe, Inc.
 
 Distributed under the Apache License, Version 2.0.
 
+<!---
 ## TODO
 
 - Investigate https://github.com/plexus/autodoc
+-->

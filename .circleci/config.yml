@@ -44,6 +44,15 @@ jobs:
       - store_artifacts:
           path: target/doc
           path: target/manual
+  doc-deploy:
+    <<: *docker_defaults
+    working_directory: ~/project/docs
+    steps:
+      - checkout
+      - <<: *restore_anchor
+      - deploy:
+          name: Deploy docs
+          command: ./deploy.sh
   deploy:
     <<: *docker_defaults
     steps:
@@ -75,7 +84,15 @@ workflows:
             - dependencies
           filters:
             tags:
-              only: /^stillsuit-.*/
+              only: /^stillsuit-.*/, /docs.*/
+            branches:
+              ignore: /.*/
+      - doc-deploy:
+          requires:
+            - docs
+          filters:
+            tags:
+              only: /^catchpocket-.*/, /docs.*/
             branches:
               ignore: /.*/
       - deploy:
