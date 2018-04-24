@@ -259,6 +259,13 @@ https://github.com/workframers/stillsuit/blob/stillsuit-0.6.0/test/stillsuit/tes
 
 == Stillsuit Custom Scalars
 
+Stillsuit includes
+https://lacinia.readthedocs.io/en/latest/custom-scalars.html[lacinia custom scalar converters] for most of the commonly-used
+https://docs.datomic.com/on-prem/schema.html#required-schema-attributes[datomic data types].
+
+In general, these scalars allow lacinia and stillsuit to handle serialization and deserialization for you, so that
+your resolvers can just deal with native types directly. On the client side, GraphQL clients should send values as `String` values.
+
 (TBD)
 
 https://github.com/workframers/stillsuit/blob/stillsuit-0.6.0/test/resources/test-schemas/rainbow/lacinia.edn[examples]
@@ -276,7 +283,7 @@ http://lacinia.readthedocs.io/en/latest/enums.html[enum types].
 We support two different flavors of enums, corresponding to two popular ways of modelling
 enumerated values in a datomic schema:
 
-1. _keyword enums_, where enum values are represented as `:db.type/keyword` attributes
+1. _keyword enums_, where enum values are represented as `:db.type/keyword` attributes.
 2. _ref enums_, where enum values are represented as `:db.type/ref` attributes which
    refer to https://docs.datomic.com/on-prem/schema.html#enums[`:db/ident` values].
 
