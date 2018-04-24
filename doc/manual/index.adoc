@@ -24,7 +24,8 @@ the bits in green.
 
 Here's some sample code corresponding to the above diagram:
 
-```clojure
+[source,clojure]
+----
 (ns stillsuit-sample.seattle-manual
   (:require [com.walmartlabs.lacinia :as lacinia]
             [stillsuit.core :as stillsuit]
@@ -57,7 +58,7 @@ Here's some sample code corresponding to the above diagram:
         ;; We pass these two values to (lacinia/execute) to resolve the query.
         result    (lacinia/execute compiled my-query nil context)]
     (println result)))
-```
+----
 
 === What stillsuit provides
 
@@ -103,14 +104,15 @@ kind of entities may be referred to at a database level.
 
 You refer to the ref resolver from a lacinia config file by specifying it like this:
 
-```clojure
+[source,clojure]
+----
 {:objects
  {:MyType
   {:fields
    {:myFieldName
     {:type    :MyOtherType
      :resolve [:stillsuit/ref options]}}}}}
-```
+----
 
 The ref resolver's primary function is to handle `:db.type/ref` datomic attributes. However,
 it will also work for regular primitive attributes like `:db.type/string` or `:db.type/long`,
@@ -138,7 +140,8 @@ attribute, and we have a `person` entity, we can get to the set of projects whic
 that person via `(:project/_author person-ent)`. With stillsuit you can expose that back-reference
 as a list of `:Project` objects on the `:Person` object like so:
 
-```clojure
+[source,clojure]
+----
 {:objects
  {:Person
   {:fields
@@ -146,7 +149,7 @@ as a list of `:Project` objects on the `:Person` object like so:
     {:type    (list (non-null :Project))
      :resolve [:stillsuit/ref {:stillsuit/attribute    :project/_author
                                :stillsuit/lacinia-type :Project}]}}}}}
-```
+----
 
 Note that we're returning a `(list (non-null :Project))` here, since a person can be the
 author of many projects. This behavior is configurable via the `:stillsuit/cardinality`
@@ -174,7 +177,8 @@ result which will only contain a single `:Person` object.
 
 With stillsuit you can do so like this:
 
-```clojure
+[source,clojure]
+----
 {:objects
  {:Person
   {:fields
@@ -184,7 +188,7 @@ With stillsuit you can do so like this:
                #:stillsuit{:attribute    :project/_author
                            :lacinia-type :Project
                            :cardinality  :stillsuit.cardinality/one}]}}}}}
-```
+----
 
 The `:stillsuit/cardinality` option can have one of two values, corresponding to the
 similarly-named datomic values.
@@ -209,7 +213,8 @@ return values in a stable, but unsorted order.
 Going back to the multiple-cardinality version of our example schema, here's what we'd
 do if every person had a `(list)` of projects, and we wanted to sort them by project name:
 
-```clojure
+[source,clojure]
+----
 {:objects
  {:Person
   {:fields
@@ -220,7 +225,7 @@ do if every person had a `(list)` of projects, and we wanted to sort them by pro
                            :lacinia-type :Project
                            :sort-key     :project/name
                            :sort-order   :ascending}]}}}}}
-```
+----
 
 The `:stillsuit/sort-key` field should be an attribute on the entities you are sorting.
 `:stillsuit/sort-order` can be either `:ascending` or `:descending`.
