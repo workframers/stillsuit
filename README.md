@@ -84,6 +84,15 @@ also what the datomic libraries use).
 In Frank Herbert's _Dune_ novels, a stillsuit is used to retain precious
 water in the harsh desert environment of Arrakis.
 
+# Contributing
+
+Bug reports, feature ideas, and PRs are welcome! However, we might not be
+a little slow to release merged PRs at times, depending on our own
+release cycles.
+
+We are especially looking for cases where stillsuit's assumptions about
+a data-model are not correct.
+
 # License
 
 Copyright © 2018 Workframe, Inc.
