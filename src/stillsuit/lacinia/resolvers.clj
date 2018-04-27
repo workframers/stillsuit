@@ -103,7 +103,7 @@
     (let [value    (get entity attribute)
           attr-map (get-in context [:stillsuit/enum-map lacinia-type :stillsuit/datomic-to-lacinia])
           mapped   (if (set? value)
-                     (map #(get % attr-map) value)
+                     (map #(get attr-map %) value)
                      (get attr-map value))]
       (when (and (some? value) (nil? mapped))
         (log/warnf "Unable to find mapping for datomic enum value %s for type %s, attribute %s!"
