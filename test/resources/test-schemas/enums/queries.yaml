@@ -40,3 +40,15 @@ ref-by-type:
     {:data
      {:refs_by_type
       [{:id "human", :movement :BIPED}]}}
+
+list-multiple-movements:
+  query: |-
+    {
+      kw_by_id(id: "human") {
+        alternative_movements
+      }
+    }
+  # Note that the type comes back as the lacinia enum keyword in the response
+  response: |-
+    {:data
+     {:kw_by_id {:alternative_movements [:QUADROPED] }}}

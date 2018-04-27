@@ -38,7 +38,11 @@
                  :movement {:type    (non-null :movement_kw)
                             :resolve [:stillsuit/enum
                                       #:stillsuit{:attribute    :animal-keyword/movement
-                                                  :lacinia-type :movement_kw}]}}}}
+                                                  :lacinia-type :movement_kw}]}
+                 :alternative_movements {:type    (list (non-null :movement_kw))
+                                         :resolve [:stillsuit/enum
+                                                   #:stillsuit{:attribute    :animal-keyword/alternative-movements
+                                                               :lacinia-type :movement_kw}]}}}}
  :queries
  {:kw_by_id
   {:type    :Animal_Keyword

@@ -18,7 +18,10 @@
    :db/unique      :db.unique/identity}
   {:db/ident       :animal-keyword/movement
    :db/valueType   :db.type/keyword
-   :db/cardinality :db.cardinality/one}]
+   :db/cardinality :db.cardinality/one}
+  {:db/ident       :animal-keyword/alternative-movements
+   :db/valueType   :db.type/keyword
+   :db/cardinality :db.cardinality/many}]
 
  ;; Ref enums. Note that these fields are refs to :db/ident values.
  [{:animal-ref/id       "horse"
@@ -32,6 +35,7 @@
  [{:animal-keyword/id       "horse"
    :animal-keyword/movement :movement.kw/quadroped}
   {:animal-keyword/id       "human"
-   :animal-keyword/movement :movement.kw/biped}
+   :animal-keyword/movement :movement.kw/biped
+   :animal-keyword/alternative-movements [:movement.kw/quadroped]}
   {:animal-keyword/id       "monkey"
    :animal-keyword/movement :movement.kw/brachiator}]]
