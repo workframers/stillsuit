@@ -265,11 +265,13 @@ https://github.com/workframers/stillsuit/blob/stillsuit-0.6.0/test/stillsuit/tes
 == Stillsuit Custom Scalars
 
 Stillsuit includes
-https://lacinia.readthedocs.io/en/latest/custom-scalars.html[lacinia custom scalar converters] for most of the commonly-used
+https://lacinia.readthedocs.io/en/latest/custom-scalars.html[lacinia custom scalar converters]
+for most of the commonly-used
 https://docs.datomic.com/on-prem/schema.html#required-schema-attributes[datomic data types].
 
-In general, these scalars allow lacinia and stillsuit to handle serialization and deserialization for you, so that
-your resolvers can just deal with native types directly. On the client side, GraphQL clients should send values as `String` values.
+In general, these scalars allow lacinia and stillsuit to handle serialization and deserialization
+for you, so that your resolvers can just deal with native types directly. On the client side,
+GraphQL clients should send values as `String` values.
 
 (TBD)
 
@@ -297,34 +299,232 @@ enum values to GraphQL ones and vice versa.
 
 === The two enum flavors
 
-(TBD)
+Why two types of enums? Each flavor has trade-offs.
 
-https://github.com/workframers/stillsuit/blob/stillsuit-0.6.0/test/resources/test-schemas/enums/datomic.edn#L1-L12[ref enum definition]
+The `:db.type/ref` style is used in most of the official datomic
+documentation and examples. It has the advantage that it's generally not possible to transact data
+that refers to a invalid value (the database will throw an exception if you try to transact `:color/bluuuue`
+when the actual value is `:color/blue`, for example). However, when querying the data, you sometimes
+need to navigate to the `:db/ident` attributes to get the actual values out, depending on the API you're using:
 
-https://github.com/workframers/stillsuit/blob/stillsuit-0.6.0/test/resources/test-schemas/enums/datomic.edn#L23-L29[ref enum usage]
+[source,clojure]
+----
+;; Here we define a ref enum attribute, plus every value it can be set to:
+@(d/transact conn [;; enum value definitions
+                   {:db/ident :color/blue}
+                   {:db/ident :color/red}
+                   ;; enum attribute
+                   {:db/ident       :car/color
+                    :db/valueType   :db.type/ref
+                    :db/cardinality :db.cardinality/one}
+                   {:db/ident       :car/id
+                    :db/valueType   :db.type/long
+                    :db/unique      :db.unique/identity
+                    :db/cardinality :db.cardinality/one}])
 
-https://github.com/workframers/stillsuit/blob/stillsuit-0.6.0/test/resources/test-schemas/enums/datomic.edn#L14-L21[keyword enum definition]
+;; Note that transacting the value just uses a simple keyword, which is nice:
+@(d/transact conn [{:db/id     (d/tempid :db.part/user)
+                    :car/color :color/red
+                    :car/id    100}])
 
-https://github.com/workframers/stillsuit/blob/stillsuit-0.6.0/test/resources/test-schemas/enums/datomic.edn#L31-L37[keyword enum usage]
+;; The entity API resolves the ref idents to keywords:
+(def car (d/entity (d/db conn) [:car/id 100]))
+(:car/color car)
+; => :color/red
 
-=== Specifying enums in the config file
+;; But the pull API requires calling code to pull out the :db/ident values:
+(d/pull (d/db conn) [:car/color] [:car/id 100])
+; => #:car{:color #:db{:id 17592186046398}}
+(d/pull (d/db conn) [{:car/color [:db/ident]}] [:car/id 100])
+; => #:car{:color #:db{:ident :color/red}}
 
-(TBD)
+;; ...and the query API also requires this:
+(d/q '[:find [?val ...]
+       :where [?car :car/id 100]
+              [?car :car/color ?color]
+              [?color :db/ident ?val]]
+     (get-db conn))
+; => [:color/red]
 
-Ref enums:
-https://github.com/workframers/stillsuit/blob/stillsuit-0.6.0/test/resources/test-schemas/enums/lacinia.edn#L3-L13[definition],
-https://github.com/workframers/stillsuit/blob/stillsuit-0.6.0/test/resources/test-schemas/enums/lacinia.edn#L30-L33[usage]
+----
 
-Keyword enums:
-https://github.com/workframers/stillsuit/blob/stillsuit-0.6.0/test/resources/test-schemas/enums/lacinia.edn#L14-L24[definition],
-https://github.com/workframers/stillsuit/blob/stillsuit-0.6.0/test/resources/test-schemas/enums/lacinia.edn#L38-L41[usage]
+By contrast, `:db.type/keyword` enums will not do any validation of the data you're inserting, so that you
+could, for example, set an attribute to `:color/bluuuue`. On the upside, the values themselves are just plain
+old keywords which behave like any other primitive value type.
 
-=== Resolving lacinia enums to datomic keywords
+[source,clojure]
+----
+;; With keyword enums, we don't need to set up the values in the database schema:
+@(d/transact conn [;; enum attribute
+                   {:db/ident       :boat/size
+                    :db/valueType   :db.type/keyword
+                    :db/cardinality :db.cardinality/one}
+                   {:db/ident       :boat/id
+                    :db/valueType   :db.type/long
+                    :db/unique      :db.unique/identity
+                    :db/cardinality :db.cardinality/one}])
 
-(TBD)
+;; Transacting values just uses plain keywords, as in ref enums:
+@(d/transact conn [{:db/id     (d/tempid :db.part/user)
+                    :boat/size :size/large
+                    :boat/id   100}])
 
-https://github.com/workframers/stillsuit/blob/stillsuit-0.6.0/test/stillsuit/test/enums.clj#L56[test]
+;; The entity, pull, and query APIs all return plain keywords:
+(def boat (d/entity (d/db conn) [:boat/id 100]))
+(:boat/size boat)
+; => :size/large
 
-=== The `:stillsuit/enum` resolver
+(d/pull (d/db conn) [:boat/size] [:boat/id 100])
+; => #:boat{:size :size/large}
 
-** using the enum resolver
+(d/q '[:find [?val ...]
+       :where [?car :boat/id 100]
+              [?car :boat/size ?val]]
+     (get-db conn))
+; => [:size/large]
+----
+
+You can see some examples of defining these two types of enums in the
+https://github.com/workframers/stillsuit/blob/stillsuit-0.6.0/test/resources/test-schemas/enums/datomic.edn[stillsuit unit tests].
+
+//https://github.com/workframers/stillsuit/blob/stillsuit-0.6.0/test/resources/test-schemas/enums/datomic.edn#L1-L12[ref enum definition]
+//
+//https://github.com/workframers/stillsuit/blob/stillsuit-0.6.0/test/resources/test-schemas/enums/datomic.edn#L23-L29[ref enum usage]
+//
+//https://github.com/workframers/stillsuit/blob/stillsuit-0.6.0/test/resources/test-schemas/enums/datomic.edn#L14-L21[keyword enum definition]
+//
+//https://github.com/workframers/stillsuit/blob/stillsuit-0.6.0/test/resources/test-schemas/enums/datomic.edn#L31-L37[keyword enum usage]
+
+=== Lacinia keywords vs datomic keywords
+
+Lacinia enum values are specified as simple, namespace-less keywords such as `:BLUE`, while datomic enum
+values tend to be lower-case namespaced keywords like `:car.colors/blue`. Stillsuit has some facilities
+to translate back and forth between the lacinia and datomic versions of these enums, so that your
+datomic-facing code
+can deal with those keywords.
+
+==== Specifying enums in the config file
+
+You can tell stillsuit about the mapping from lacinia enum values to datomic enum values by adding some
+attributes to the http://lacinia.readthedocs.io/en/latest/enums.html[enum definitions] of your lacinia
+configuration.
+
+To tell stillsuit what the datomic equivalents are, you'll want to add `:stillsuit/datomic-value` to
+the values you want to translate:
+
+[source,clojure]
+----
+;; Lacinia configuration
+{:enums
+ {:carColorType
+  {:description "Enum for all colors a car can be"
+   :values      [{:enum-value              :BLUE
+                  :stillsuit/datomic-value :car.colors/blue}
+                 {:enum-value              :RED
+                  :stillsuit/datomic-value :car.colors/red}]}}}
+----
+
+Note that you'll need to use the longer form of enum value definitions to use this feature; the simpler
+`{:enums {:foo {:values [:KEYWORD_1 KEYWORD_2]}}}` form doesn't work.
+
+==== Using the `:stillsuit/enum` resolver
+
+With the above definitions in place, you can specify that any GraphQL field maps to a datomic enum
+value using the `:stillsuit/enum` resolver for the field.
+
+For example, here's a car object definition matching the definitions above:
+
+[source,clojure]
+----
+{:objects
+ {:Car
+  {:fields
+   {:id    {:type (non-null Int)}
+    :color {:type (non-null :carColorType)
+            :resolve [:stillsuit/enum
+                      #:stillsuit{:attribute    :car/color
+                                  :lacinia-type :carColorType}]}}}
+----
+
+The enum resolver takes as its only argument a map with two required keys:
+
+* `:stillsuit/attribute` - specifies the datomic attribute that stillsuit should use to get the
+  value of the field
+* `:stillsuit/lacinia-type` - specifies the lacinia enum type the field will return.
+
+By itself, this is already sufficient to translate datomic enum values to lacinia ones. Assuming
+we've already set up a `Car(id: Int!)` query that returns a datomic `:car` entity, this GraphQL
+query should work:
+
+[source,graphql]
+----
+{
+  Car(id: 100) {
+    color
+  }
+}
+----
+
+The output from lacinia after running this query should look something like this:
+
+[source,clojure]
+----
+{:Car {:color :BLUE}}
+----
+
+//Ref enums:
+//https://github.com/workframers/stillsuit/blob/stillsuit-0.6.0/test/resources/test-schemas/enums/lacinia.edn#L3-L13[definition],
+//https://github.com/workframers/stillsuit/blob/stillsuit-0.6.0/test/resources/test-schemas/enums/lacinia.edn#L30-L33[usage]
+//
+//Keyword enums:
+//https://github.com/workframers/stillsuit/blob/stillsuit-0.6.0/test/resources/test-schemas/enums/lacinia.edn#L14-L24[definition],
+//https://github.com/workframers/stillsuit/blob/stillsuit-0.6.0/test/resources/test-schemas/enums/lacinia.edn#L38-L41[usage]
+
+==== Resolving lacinia enums to datomic keywords
+
+The `:stillsuit/enum` resolver translates keywords on output, but you may also need to deal
+with enums in input as well. For instance, if we had a `Paint` mutation to change a car's
+color, we might define it like this:
+
+[source,clojure]
+----
+{:mutations
+ {:Paint
+  {:type    :Car
+   :args    {:id    {:type (non-null Int)}
+             :color {:type (non-null :carColorType)}}
+   :resolve :my-paint-resolver}}}
+----
+
+Note that the `:color` parameter is of the enum type we defined earlier, `:carColorType`.
+
+Client code might call the mutation like this:
+
+[source,graphql]
+----
+mutation {
+  Paint(id: 100, color: RED) {
+    color
+  }
+}
+----
+
+When we're implementing a resolver for this mutation, the `args` argument will look like this:
+`{:id 100 :color :RED}`. To translate it back into the datomic equivalent, stillsuit includes
+the function
+http://docs.workframe.com/stillsuit/current/doc/stillsuit.core.html#var-datomic-enum[`(stillsuit/datomic-enum)`].
+You use it by passing in the lacinia context and some type information about the field:
+
+[source,clojure]
+----
+(defn my-paint-resolver
+  [context args value]
+  (my-update-car-color!     ; Let's say this returns a :car entity
+   (stillsuit/datomic-enum
+    context                 ; The lacinia context
+    :carColorType           ; The lacinia enum type
+    (:color args))))        ; The value we want to convert (:RED)
+----
+
+In the above example `(my-update-car-color!)` would get `:car.colors/red` as its argument,
+which can be directly transacted to the datomic connection.
