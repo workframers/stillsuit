@@ -1,4 +1,5 @@
 (ns stillsuit.lib.util
+  "A collection of utility functions."
   (:require [clojure.walk :as walk]
             [clojure.tools.logging :as log]
             [clojure.tools.reader.edn :as edn]

@@ -1,4 +1,5 @@
 (ns stillsuit.lacinia.queries
+  "Implementation functions for creating top-level stillsuit queries."
   (:require [com.walmartlabs.lacinia.resolve :as resolve]
             [stillsuit.lacinia.resolvers :as resolvers]
             [stillsuit.datomic.core :as datomic]

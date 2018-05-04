@@ -1,14 +1,17 @@
-= Introduction to stillsuit
+= stillsuit user manual
 Tim Gilbert <tim@workframe.com>
-v0.1, 2018-01-26
+v0.10, 2018-05-04
 :sectanchors:
+:toc: left
+:source-highlight: true
 
 `stillsuit` is a library intended to be used with lacinia and datomic.
 
 == Basic operation
 
-The main interface to stillsuit is via the `(stillsuit/decorate)` function. This
-function takes in a lacinia schema file, some maps referencing lacinia resolver
+The main interface to stillsuit is via the
+http://docs.workframe.com/stillsuit/current/doc/stillsuit.core.html#var-decorate[`(stillsuit/decorate)`]
+function. This function takes in a lacinia schema file, some maps referencing lacinia resolver
 functions, and a configuration map. It returns a compiled lacinia file and an
 application context; these parameters can be passed to `(lacinia/execute)` to
 execute GraphQL queries.
@@ -46,7 +49,6 @@ Here's some sample code corresponding to the above diagram:
 (defn -main [_]
   (let [;; This options map tells stillsuit where to look for stuff
         options   {:stillsuit/schema     my-schema
-                   :stillsuit/config     {}
                    :stillsuit/connection (d/connect my-db-uri)
                    :stillsuit/resolvers  my-resolvers}
         ;; (stillsuit/decorate) is the main stillsuit interface.
@@ -69,16 +71,51 @@ it before returning lacinia input data.
 
 stillsuit's public interface is fairly simple. The
 http://docs.workframe.com/stillsuit/current/doc/stillsuit.core.html#var-decorate[`(stillsuit/decorate)`]
-function accepts a stillsuit config, a datomic connection, and some references to resolvers
+function accepts a lacinia configuration map, a datomic connection, and some references to resolvers
 and bits of code. It returns a map containing the parameters you need to pass to lacinia's
 http://walmartlabs.github.io/lacinia/com.walmartlabs.lacinia.html#var-execute[`(lacinia/execute)`]
 function.
 
-* TODO: Example call
+=== Compiling a schema
 
-* adding stuff to app-context
+The basic interface to stillsuit is through a single function, `(stillsuit/decorate`.
+This function takes a single argument, a map with several keys in the `:stillsuit` namespace.
+Its result is a map with two keys.
 
-=== `(stillsuit/execute)`
+(More docs TBD, but see the
+http://docs.workframe.com/stillsuit/current/doc/stillsuit.core.html#var-decorate[API docs]
+for more info)
+
+=== Calling `(lacinia/execute)`
+
+Invoking `(stillsuit/decorate)` will give you back a map with two keys:
+
+* `:stillsuit/schema`: a compiled lacinia schema
+* `:stillsuit/app-context`: the lacinia
+  http://lacinia.readthedocs.io/en/latest/resolve/context.html[application context]
+
+Invoking lacinia is as simple as passing these two values to `(lacinia/execute)`, along with the query
+you want to execute and its associated variables, if any.
+
+[source,clojure]
+----
+(let [options   #:stillsuit{:connection my-connection
+                            :resolvers  my-resolvers
+                            :schema     {:objects {:foo {...}}}}
+      decorated (stillsuit/decorate options)]
+  (lacinia/execute
+   (:stillsuit/schema decorated)                            ; Schema
+   "query getFoo(id: Int!) { foo(id: $id) { bar } }"        ; Query
+   {:foo-id 123}                                            ; Variables
+   (:stillsuit/app-context decorated)))                     ; Context
+----
+
+NOTE: By default, stillsuit will run
+https://lacinia.readthedocs.io/en/latest/overview.html#compiling-the-schema[`(lacinia.schema/compile)`]
+for you. If you need to mess with the schema before you compile it, you can set
+the value `:stillsuit/compile?` to `false` in the `:stillsuit/config` map.
+
+==== `(stillsuit/execute)`
 
 As a convenience, stillsuit also includes a
 http://docs.workframe.com/stillsuit/current/doc/stillsuit.core.html#var-execute[little wrapper function]
@@ -86,11 +123,25 @@ which calls `(lainia/execute)` for you from the result of `(stillsuit/decorate)`
 
 == Configuring stillsuit
 
-(TBD)
+Stillsuit can take in a number of options to configure how it operates, which are
+represented as a map.
 
-* config file
-** sample config or link to one
-** loading the config
+The configuration settings come from three places:
+
+* Stillsuit has a set of defaults for most config settings.
+* If the schema configuration passed to stillsuit contains a top-level key `:stillsuit/config`,
+  those values will override the default values.
+* A map passed as the `:stillsuit/config` key in the options map of `(stillsuit/decorate)` will
+  override both of the above values.
+
+The config settings from all three places are deep-merged.
+
+=== Config settings
+
+`:stillsuit/compile?` - if set to `false`, stillsuit won't compile the lacinia schema configuration
+returned in the `:stillsuit/schema` key of `(stillsuit/decorate)`.
+
+(More TBD)
 
 == The `:stillsuit/ref` resolver
 
@@ -172,7 +223,7 @@ referring to it. For example, we may know that in our system a person will only 
 author of a single project.
 
 In this case it can be convenient to specify the the link from `:Person` objects back to
-`:Project` objects will only return a single `:Person` object, rather than a `(list)`
+`:Project` objects will only return a single `:Person` object, rather than a `(list :Person)`
 result which will only contain a single `:Person` object.
 
 With stillsuit you can do so like this:
@@ -236,9 +287,8 @@ a custom resolver.
 
 == Writing Query Resolvers
 
-(TBD)
-
-https://github.com/workframers/stillsuit/blob/stillsuit-0.6.0/test/stillsuit/test/resolvers.clj[tests]
+(More TBD - see
+https://github.com/workframers/stillsuit/blob/stillsuit-0.6.0/test/stillsuit/test/resolvers.clj[tests])
 
 * how to write queries
 ** getting a db
@@ -469,7 +519,7 @@ The output from lacinia after running this query should look something like this
 
 [source,clojure]
 ----
-{:Car {:color :BLUE}}
+{:data {:Car {:color :BLUE}}}
 ----
 
 //Ref enums:

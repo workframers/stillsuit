@@ -1,4 +1,11 @@
 (ns stillsuit.core
+  "Main public API for stillsuit.
+
+  For more details, see the [user manual](http://docs.workframe.com/stillsuit/current/manual/).
+
+  Note that this namespace constitutes the entirety of the public API; all the other
+  namespaces in stillsuit can be considered to be implementation details and may change
+  over time."
   (:require [stillsuit.lacinia.queries :as sq]
             [stillsuit.lacinia.scalars :as ss]
             [stillsuit.lacinia.resolvers :as sr]
@@ -43,7 +50,16 @@
 (defn datomic-enum
   "Given a stillsuit-decorated app context and a keyword representing a lacinia enum which has
   been described in the stillsuit config, return the keyword corresponding to the datomic value
-  for that keyword."
+  for that keyword.
+
+  Parameters:
+
+  - `app-context`: the lacinia application context (first argument to a resolver function)
+  - `lacinia-type`: the keyword corresponding to a lacinia `:enum` definition
+  - `lacinia-enum-keyword`: a keyword representing the value we're trying to convert to
+    its datomic equivalent
+
+  For more information, see [the user manual](http://docs.workframe.com/stillsuit/current/manual/#_stillsuit_enums)."
   [app-context lacinia-type lacinia-enum-keyword]
   (let [value (get-in app-context [:stillsuit/enum-map lacinia-type :stillsuit/lacinia-to-datomic lacinia-enum-keyword])]
     (when (nil? value)
@@ -52,7 +68,35 @@
 
 (defn decorate
   "Main interface to stillsuit. Accepts a map containing various parameters as input; returns
-  a map with an app context and a schema."
+  a map with an app context and a schema. The map can be passed to [[execute]] in order to
+  invoke lacinia with its configuration.
+
+  The single argument to `(decorate)` should be a map with the following keys:
+
+  - `:stillsuit/schema`: a normal
+    [lacinia schema definition](http://lacinia.readthedocs.io/en/latest/tutorial/init-schema.html#schema-edn-file).
+  - `:stillsuit/connection`: a datomic [connection object]().
+  - `:stillsuit/resolvers`: a map of keywords to resolver function objects, identical to the
+    map you'd pass to
+    [`(lacinia.util/attach-resolvers)`](http://lacinia.readthedocs.io/en/latest/resolve/attach.html).
+  - `:stillsuit/config` (optional): a map of
+    [configuration options](http://docs.workframe.com/stillsuit/current/manual/#_compiling_a_schema)
+    for stillsuit.
+  - `:stillsuit/context` (optional): a map containing any custom information your resolvers need,
+    identical to the `context` argument you'd pass to `(lacinia/execute)`.
+  - `:stillsuit/transformers` (optional): a map of keywords to scalar transformer function objects,
+    identical to the map you'd pass to
+    [`(lacinia.util/attach-scalar-transformers)`](http://lacinia.readthedocs.io/en/latest/custom-scalars.html#attaching-scalar-transformers).
+
+  The return value of this function is a map with two keys:
+
+  - `:stillsuit/schema`: the compiled, transformed schema definition
+  - `:stillsuit/app-context`: an application context object
+
+  These two data structures can be passed to `(lacinia/execute)` directly, or there is a
+  simple wrapper function [[execute]] that will invoke lacinia for you.
+
+  For more information, see [the user manual](http://docs.workframe.com/stillsuit/current/manual/)."
   [{:stillsuit/keys [schema config resolvers transformers context connection]}]
   (let [opts         (merge @default-config-schema (:stillsuit/config schema) config)
         uncompiled   (-> @base-schema
@@ -73,7 +117,11 @@
      :stillsuit/app-context (make-app-context context schema connection enum-map opts)}))
 
 (defn execute
-  "Convenience function to take the result of (decorate) and execute a query against it."
+  "Convenience function to take the result of [[decorate]] and execute a query against it.
+  The `query` and `variables` parameters are the same ones that would be passed to
+  `(lacinia.core/execute)`.
+
+  For more information, see [the user manual](http://docs.workframe.com/stillsuit/current/manual/#__code_stillsuit_execute_code)."
   ([stillsuit-result query]
    (execute stillsuit-result query nil))
   ([stillsuit-result query variables]
