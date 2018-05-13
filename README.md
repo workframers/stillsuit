@@ -53,7 +53,7 @@ your local maven repository.
 
 The docs are sparse, but you can find a
 [user manual](http://docs.workframe.com/stillsuit/current/manual/) and
-[API docuemntation](http://docs.workframe.com/stillsuit/current/doc/) online.
+[API documentation](http://docs.workframe.com/stillsuit/current/doc/) online.
 
 There is a [slide deck here](http://docs.workframe.com/catchpocket/current/slides/)
 discussion stillsuit and catchpocket.
