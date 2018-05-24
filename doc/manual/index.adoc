@@ -5,7 +5,8 @@ v0.10, 2018-05-04
 :toc: left
 :source-highlight: true
 
-`stillsuit` is a library intended to be used with lacinia and datomic.
+`stillsuit` is a library intended to be used with lacinia and datomic. It provides a glue mechanism and
+some useful utilities that make it easy to implement GraphQL APIs on top of datomic.
 
 == Basic operation
 
@@ -166,8 +167,9 @@ The config settings from all three places are deep-merged.
 
 === Config settings
 
-`:stillsuit/compile?` - if set to `false`, stillsuit won't compile the lacinia schema configuration
-returned in the `:stillsuit/schema` key of `(stillsuit/decorate)`.
+`:stillsuit/compile?` - if set to `false`, stillsuit won't
+http://lacinia.readthedocs.io/en/latest/tutorial/init-schema.html#schema-namespace[compile]
+the lacinia schema configuration returned in the `:stillsuit/schema` key of `(stillsuit/decorate)`.
 
 (More TBD)
 
@@ -315,18 +317,14 @@ a custom resolver.
 
 == Writing Query Resolvers
 
-In stillsuit we use the term "query resolver" to refer to a lacinia resolver that returns one
-or more entities the provide the basic data for a GraphQL query.
-
-Basically a query is a regular resolver function that will return one or more
+In stillsuit we use the term "query resolver" to refer to a lacinia resolver that returns one or more
+entities the provide the basic data for a GraphQL query. A query function is a regular lacinia
+http://lacinia.readthedocs.io/en/latest/resolve/overview.html[resolver function]
+that returns one or more
 https://docs.datomic.com/on-prem/entities.html[datomic entity objects].
 
-Here's an example of writing a query resolver. First let's define the datomic schema we'll
-be working with.
-
-First we'll define the lacinia schema for the query. For this example, we'll define a very simple
+Here's an example of writing a query resolver. First we'll define the lacinia schema for the query. For this example, we'll define a very simple
 schema, where we define a `:Person` object with a `:db.type/long` identifier and a string name.
-Here's a sample REPL session:
 
 [source,clojure]
 ----
