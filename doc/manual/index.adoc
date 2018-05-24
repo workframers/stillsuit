@@ -287,11 +287,161 @@ a custom resolver.
 
 == Writing Query Resolvers
 
+In stillsuit we use the term "query resolver" to refer to a lacinia resolver that returns one
+or more entities the provide the basic data for a GraphQL query.
+
+Basically a query is a regular resolver function that will return one or more
+https://docs.datomic.com/on-prem/entities.html[datomic entity objects].
+
+Here's an example of writing a query resolver. First let's define the datomic schema we'll
+be working with.
+
+First we'll define the lacinia schema for the query. For this example, we'll define a very simple
+schema, where we define a `:Person` object with a `:db.type/long` identifier and a string name.
+Here's a sample REPL session:
+
+[source,clojure]
+----
+;; Set up the datomic connection...
+(require '[datomic.api :as d])
+(def uri "datomic:mem://example")
+(d/create-database uri)
+(def conn (d/connect uri))
+
+;; Define the schema...
+(def datomic-schema
+  [{:db/ident       :person/id
+    :db/unique      :db.unique/identity
+    :db/valueType   :db.type/long
+    :db/cardinality :db.cardinality/one}
+   {:db/ident       :person/name
+    :db/valueType   :db.type/string
+    :db/cardinality :db.cardinality/one}])
+@(d/transact conn datomic-schema)
+
+;; Define some people...
+(def persons
+  [{:person/id   123
+    :person/name "Sarah"}
+   {:person/id   456
+    :person/name "Joe"}])
+@(d/transact conn persons)
+
+;; Let's just make sure the data is there.
+(d/q '[:find [(pull ?person [*]) ...]
+       :where [?person :person/id 123]]
+     (d/db conn))
+
+;; => [{:db/id 17592186045419, :person/id 123, :person/name "Sarah"}]
+----
+
+Now we'll define a lacinia schema, containing an object definition for the above simple entity, plus
+two different queries to retrieve person entities from the database:
+
+[source,clojure]
+----
+(def lacinia-schema
+  '{:objects
+    {:Person
+     {:fields
+      {:name
+       {:type String}
+       :id
+       {:type Int}}}}
+    :queries
+    {:person
+     {:type        :Person
+      :description "Given a :person/id value, return the relevant person entity."
+      :args        {:id {:type (non-null Int)}}
+      :resolve     :query/person-by-id}
+     :everybody
+     {:type        (list (non-null :Person))
+      :description "Return every person entity."
+      :resolve     :query/everybody}}})
+----
+
+WARNING: We are cheating a bit here by defining the :person/id field as type `Int`. In fact, the value
+is a java `Long`, which can contain a larger integer than a GraphQL `Int` value can. See the section
+on Scalar Converters for more information.
+
+Actually writing the resolver functions themselves is pretty straightforward; they work just like regular
+query resolvers, but they must return either a single entity or a list of entities.
+
+=== Getting a datomic db value inside a query resolver
+
+When you call `(stillsuit/decorate)`, stillsuit will stash the datomic connection object you pass it inside
+the lacinia app context. To retrieve it, you can pass the app context to the function
+`(stillsuit/connection)`.
+You can then call the regular datomic `(d/db)` function on the connection to get a db value.
+
+As a shortcut, stillsuit also provides a method `(stillsuit/db)` that will get the current db value from
+the connection.
+
+=== Query resolver sample: list result
+
+With the above information, we can now write our query functions. Here is the resolver for the `:everybody`
+query which returns all users:
+
+[source,clojure]
+----
+(defn everybody [context args value]
+  (let [db   (stillsuit/db context)
+        eids (d/q '[:find [?person ...]
+                    :in $
+                    :where [?person :person/id _]]
+                  db)]
+    (map #(d/entity db %) eids)))
+----
+
+Here we use `(stillsuit/db)` to get the current db value from our datomic connection, run a
+query to find the EID
+
+=== Query resolver sample: single result
+
+Here's a resolver for a query which accepts a `:person/id` value as its input and then returns the
+corresponding person entity (or nil if the ID is not found):
+
+[source,clojure]
+----
+(defn person-by-id [context {:keys [id] :as args} value]
+  (let [db  (stillsuit/db context)
+        eid (d/q '[:find ?person .
+                   :in $ ?id
+                   :where [?person :person/id ?id]]
+                 db
+                 id)]
+    (some-> eid (partial d/entity db))))
+----
+
+This is similar to the last one, but we're using the "scalar value"
+https://docs.datomic.com/on-prem/query.html#find-specifications[find specification] in our query to
+get just a single EID out of the query, and we then pass that into `(d/entity)` or return `nil` if
+it wasn't found.
+
+=== Putting it all together
+
+Now that we've defined our query resolvers and schema definitions, we should be able to run stillsuit,
+run a query against the decorated schema, and get a result back.
+
+[source,clojure]
+----
+;; Maps from the keywords we used in our schema definition to the actual resolver functions
+(def resolvers {:query/person-by-id person-by-id :query/everybody everybody})
+
+;; Call stillsuit
+(def decorated (decorate #:stillsuit{:schema lacinia-schema
+                                     :connection conn
+                                     :resolvers resolvers}))
+
+;; Now we can use the regular lacinia functions to run queries against our decorated result:
+(stillsuit/execute decorated "{ everybody { name } }")
+;; => {:data #ordered/map([:everybody (#ordered/map([:name "Sarah"]) #ordered/map([:name "Joe"]))])}
+
+----
+
 (More TBD - see
 https://github.com/workframers/stillsuit/blob/stillsuit-0.6.0/test/stillsuit/test/resolvers.clj[tests])
 
-* how to write queries
-** getting a db
 ** returning entities or entity lists
 ** sample query resolver for a single-entity
 ** sample for a multiple-entity query
@@ -299,7 +449,12 @@ https://github.com/workframers/stillsuit/blob/stillsuit-0.6.0/test/stillsuit/tes
 
 == Writing Mutation Resolvers
 
-(TBD)
+Writing a mutation resolver is essentially the same as writing a query resolver; the essential difference
+is that after your resolver gets a datomic connection, it may transact some data over the connection.
+Just as with a query resolver, it should return either a single entity or a seq of entities, which will
+then enter the usual lacinia field resolution process.
+
+(More docs TBD)
 
 ** getting a connection
 ** return an entity
@@ -308,7 +463,7 @@ https://github.com/workframers/stillsuit/blob/stillsuit-0.6.0/test/stillsuit/tes
 
 == The Default Resolver
 
-(TBD)
+(More docs TBD)
 
 ** lacinia to datomic name translation
 
@@ -323,7 +478,7 @@ In general, these scalars allow lacinia and stillsuit to handle serialization an
 for you, so that your resolvers can just deal with native types directly. On the client side,
 GraphQL clients should send values as `String` values.
 
-(TBD)
+(More docs TBD)
 
 https://github.com/workframers/stillsuit/blob/stillsuit-0.6.0/test/resources/test-schemas/rainbow/lacinia.edn[examples]
 

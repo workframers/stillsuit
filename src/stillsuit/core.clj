@@ -66,6 +66,29 @@
       (log/warnf "Unable to find datomic enum equivalent for lacinia enum value %s!" lacinia-enum-keyword))
     value))
 
+(defn connection
+  "Given a stillsuit-decorated app context, return the datomic connection object that was associated with the
+  context at the time `(stillsuit/decorate)` was called.
+
+  Parameters:
+
+  - `app-context`: the lacinia application context (first argument to a resolver function)
+
+  For more information, see [the user manual](http://docs.workframe.com/stillsuit/current/manual/#_stillsuit_enums)."
+  [app-context]
+  (:stillsuit/connection app-context))
+
+(defn db
+  "Given a stillsuit-decorated app context, get the most recent datomic db value from its datomic connection.
+
+  Parameters:
+
+  - `app-context`: the lacinia application context (first argument to a resolver function)
+
+  For more information, see [the user manual](http://docs.workframe.com/stillsuit/current/manual/#_stillsuit_enums)."
+  [app-context]
+  (some-> app-context :stillsuit/connection d/db))
+
 (defn decorate
   "Main interface to stillsuit. Accepts a map containing various parameters as input; returns
   a map with an app context and a schema. The map can be passed to [[execute]] in order to

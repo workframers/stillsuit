@@ -12,14 +12,14 @@
 (use-fixtures :once fixtures/once)
 (use-fixtures :each fixtures/each)
 
-(defn- ref-by-id [{:keys [:stillsuit/connection]} {:keys [id]} _]
-  (some-> connection d/db (d/entity [:animal-ref/id id])))
+(defn- ref-by-id [context {:keys [id]} _]
+  (some-> context stillsuit/db (d/entity [:animal-ref/id id])))
 
-(defn- keyword-by-id [{:keys [:stillsuit/connection]} {:keys [id]} _]
-  (some-> connection d/db (d/entity [:animal-keyword/id id])))
+(defn- keyword-by-id [context {:keys [id]} _]
+  (some-> context stillsuit/db (d/entity [:animal-keyword/id id])))
 
 (defn- ref-by-type [context args _]
-  (let [db     (d/db (:stillsuit/connection context))
+  (let [db     (stillsuit/db context)
         a-type (stillsuit/datomic-enum context :movement_ref (:type args))
         ents   (->> (d/q '[:find [?a ...]
                            :in $ ?t
