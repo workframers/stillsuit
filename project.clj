@@ -34,9 +34,10 @@
           :themes     [:rdash]
           :source-uri "https://github.com/workframers/stillsuit/blob/master/{filepath}#L{line}"}
 
-  :asciidoctor [{:sources "doc/manual/*.adoc"
-                 :format  :html5
-                 :to-dir  "target/manual"}]
+  :asciidoctor [{:sources          "doc/manual/*.adoc"
+                 :format           :html5
+                 :source-highlight true
+                 :to-dir           "target/manual"}]
 
   :profiles {:dev     {:plugins      [[lein-cloverage "1.0.10"]
                                       [lein-shell "0.5.0"]

@@ -2,14 +2,15 @@
   (:require [clojure.test :refer :all]
             [stillsuit.test-util.fixtures :as fixtures]
             [clojure.tools.logging :as log]
-            [datomic.api :as d]))
+            [datomic.api :as d]
+            [stillsuit.core :as stillsuit]))
 
 (use-fixtures :once fixtures/once)
 (use-fixtures :each fixtures/each)
 
 (defn- get-artist-by-id
-  [{:stillsuit/keys [connection]} {:keys [id]} v]
-  (let [db (d/db connection)]
+  [context {:keys [id]} v]
+  (let [db (stillsuit/db context)]
     (some->> (d/q '[:find ?a .
                     :in $ ?id
                     :where [?a :artist/id ?id]]
@@ -17,8 +18,8 @@
              (d/entity db))))
 
 (defn- get-all-artists
-  [{:stillsuit/keys [connection]} {:keys [id]} v]
-  (let [db (d/db connection)]
+  [context {:keys [id]} v]
+  (let [db (stillsuit/db context)]
     (some->> (d/q '[:find [?a ...]
                     :where [?a :artist/id]]
                   db)

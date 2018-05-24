@@ -1,4 +1,5 @@
 (ns stillsuit.lacinia.resolvers
+  "Implementation functions for stillsuit resolvers."
   (:require [stillsuit.datomic.core :as sd]
             [com.walmartlabs.lacinia.resolve :as resolve]
             [clojure.tools.logging :as log]

@@ -1,4 +1,5 @@
 (ns stillsuit.datomic.core
+  "Implementation functions for dealing with datomic interactions."
   (:require [datomic.api :as d]
             [clojure.tools.logging :as log])
   (:import (java.util UUID)))

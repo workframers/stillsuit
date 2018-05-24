@@ -23,8 +23,8 @@
       (log/warnf "Typecheck failed: expected %s, got %s" (str expect-type) (str val-type)))
     (= val-type expect-type)))
 
-(defn- rainbow-by-id [{:keys [:stillsuit/connection]} {:keys [id]} _]
-  (some-> connection d/db (d/entity [:rainbow/id num])))
+(defn- rainbow-by-id [context {:keys [id]} _]
+  (some-> context stillsuit/db (d/entity [:rainbow/id id])))
 
 (defn- echo-rainbow [context args value]
   (-> args vals first))

@@ -1,4 +1,8 @@
 (ns stillsuit.lacinia.scalars
+  "Implementation functions for stillsuit scalar transformers.
+
+  The intent here is to provide transformers for all of datomic's primitive values,
+  though we ignore some oddball types like `:db.type/uri`."
   (:require [com.walmartlabs.lacinia.schema :as schema]
             [clojure.tools.logging :as log]
             [clojure.edn :as edn]
