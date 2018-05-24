@@ -438,7 +438,7 @@ corresponding person entity (or nil if the ID is not found):
                    :where [?person :person/id ?id]]
                  db
                  id)]
-    (some-> eid (partial d/entity db))))
+    (some->> eid (d/entity db))))
 ----
 
 This is similar to the last one, but we're using the "scalar value"
@@ -465,15 +465,12 @@ run a query against the decorated schema, and get a result back.
 (stillsuit/execute decorated "{ everybody { name } }")
 ;; => {:data #ordered/map([:everybody (#ordered/map([:name "Sarah"]) #ordered/map([:name "Joe"]))])}
 
+(execute decorated "{ person(id: 123) { name } }")
+;; => {:data #ordered/map([:person #ordered/map([:name "Sarah"])])}
 ----
 
 (More TBD - see
 https://github.com/workframers/stillsuit/blob/stillsuit-0.6.0/test/stillsuit/test/resolvers.clj[tests])
-
-** returning entities or entity lists
-** sample query resolver for a single-entity
-** sample for a multiple-entity query
-** sort order of results
 
 == Writing Mutation Resolvers
 
