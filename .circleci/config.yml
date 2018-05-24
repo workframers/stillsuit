@@ -92,7 +92,7 @@ workflows:
             - docs
           filters:
             tags:
-              only: /^catchpocket-.*/, /docs.*/
+              only: /^stillsuit-.*/, /docs.*/
             branches:
               ignore: /.*/
       - deploy:

@@ -463,7 +463,7 @@ run a query against the decorated schema, and get a result back.
 (stillsuit/execute decorated "{ everybody { name } }")
 ;; => {:data #ordered/map([:everybody (#ordered/map([:name "Sarah"]) #ordered/map([:name "Joe"]))])}
 
-(execute decorated "{ person(id: 123) { name } }")
+(stillsuit/execute decorated "{ person(id: 123) { name } }")
 ;; => {:data #ordered/map([:person #ordered/map([:name "Sarah"])])}
 ----
 
