@@ -64,8 +64,15 @@ Here's some sample code corresponding to the above diagram:
 
 === What stillsuit provides
 
-`(stillsuit/decorate)` adds a bunch of stuff to the configuration you provide to
-it before returning lacinia input data.
+Stillsuit contains a bunch of stuff intended to make it easy to build GraphQL APIs that
+are backed by datomic databases:
+
+* a resolver which can be used to navigate datomic graph data
+* a resolver used to expose datomic enum or keyword values as GraphQL enums
+* a set of custom scalar transformers to aid in serializing and  deserializing datomic's primitive types
+
+`(stillsuit/decorate)` is the main interface to stillsuit; it associates a datomic connection with
+a lacinia application context and also integrates stillsuit's own resolvers into the user's code.
 
 == Invoking stillsuit
 
@@ -78,24 +85,31 @@ function.
 
 === Compiling a schema
 
-The basic interface to stillsuit is through a single function, `(stillsuit/decorate`.
-This function takes a single argument, a map with several keys in the `:stillsuit` namespace.
-Its result is a map with two keys.
+`(stillsuit/decorate)` accepts a single argument, a map with several keys in the `:stillsuit` namespace.
 
-(More docs TBD, but see the
-http://docs.workframe.com/stillsuit/current/doc/stillsuit.core.html#var-decorate[API docs]
-for more info)
+See the http://docs.workframe.com/stillsuit/current/doc/stillsuit.core.html#var-decorate[API docs]
+for more information about what data should be in argument map, but at a minimum it requires the
+following three keys:
 
-=== Calling `(lacinia/execute)`
+* `:stillsuit/connection`: a
+  https://docs.datomic.com/on-prem/peer-getting-started.html#connecting[datomic connection object]
+* `:stillsuit/schema`: the uncompiled lacinia
+  http://lacinia.readthedocs.io/en/latest/tutorial/init-schema.html[schema definition] to use
+* `:stillsuit/resolvers`: a map from resolver keyword names to resolvers functions, just as you
+  would pass to
+  http://lacinia.readthedocs.io/en/latest/resolve/attach.html[`(lacinia.util/attach-resolvers)`].
 
-Invoking `(stillsuit/decorate)` will give you back a map with two keys:
+The return value of `(stillsuit/decorate)` is a map with two keys:
 
 * `:stillsuit/schema`: a compiled lacinia schema
 * `:stillsuit/app-context`: the lacinia
   http://lacinia.readthedocs.io/en/latest/resolve/context.html[application context]
 
-Invoking lacinia is as simple as passing these two values to `(lacinia/execute)`, along with the query
-you want to execute and its associated variables, if any.
+=== Calling `(lacinia/execute)`
+
+Invoking lacinia to execute a GraphQL query is as simple as passing the values returned by
+`(stillsuit/decorate)` to `(lacinia/execute)`, along with the query you want to execute and its
+associated variables, if any.
 
 [source,clojure]
 ----
@@ -119,7 +133,21 @@ the value `:stillsuit/compile?` to `false` in the `:stillsuit/config` map.
 
 As a convenience, stillsuit also includes a
 http://docs.workframe.com/stillsuit/current/doc/stillsuit.core.html#var-execute[little wrapper function]
-which calls `(lainia/execute)` for you from the result of `(stillsuit/decorate)`.
+which calls `(lacinia/execute)` for you from the result of `(stillsuit/decorate)`.
+
+With `(stillsuit/execute)`, the above code would look like this:
+
+[source,clojure]
+----
+(let [options   #:stillsuit{:connection my-connection
+                            :resolvers  my-resolvers
+                            :schema     {:objects {:foo {...}}}}
+      decorated (stillsuit/decorate options)]
+  (stillsuit/execute
+   decorated                                                ; Stillsuit result
+   "query getFoo(id: Int!) { foo(id: $id) { bar } }"        ; Query
+   {:foo-id 123}))                                          ; Variables
+----
 
 == Configuring stillsuit
 
@@ -429,11 +457,11 @@ run a query against the decorated schema, and get a result back.
 (def resolvers {:query/person-by-id person-by-id :query/everybody everybody})
 
 ;; Call stillsuit
-(def decorated (decorate #:stillsuit{:schema lacinia-schema
+(def decorated (decorate #:stillsuit{:schema     lacinia-schema
                                      :connection conn
-                                     :resolvers resolvers}))
+                                     :resolvers  resolvers}))
 
-;; Now we can use the regular lacinia functions to run queries against our decorated result:
+;; Now we can execute queries against our decorated result:
 (stillsuit/execute decorated "{ everybody { name } }")
 ;; => {:data #ordered/map([:everybody (#ordered/map([:name "Sarah"]) #ordered/map([:name "Joe"]))])}
 

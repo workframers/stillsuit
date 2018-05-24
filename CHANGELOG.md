@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.10.0] - 2018-05-24
+### Added
+
+- Lots of docs updates, `(stillsuit/connection)` and friends
+
 ## [0.3.0] - 2018-02-14 💝
 ### Added
 
