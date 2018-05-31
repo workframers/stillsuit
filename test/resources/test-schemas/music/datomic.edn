@@ -36,7 +36,7 @@
    :db/cardinality :db.cardinality/one}
   {:db/ident       :track/position
    :db/valueType   :db.type/long
-   :db/cardinality :db.cardinality/many}]
+   :db/cardinality :db.cardinality/one}]
 
  ;; Data
  [{:db/id       "crass"

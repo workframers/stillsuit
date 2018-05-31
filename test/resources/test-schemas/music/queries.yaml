@@ -79,3 +79,16 @@ album_backref:
     }
   response: |-
     {:data {:album_by_id {:artist {:name "Crass" :id "1"}}}}
+
+album_filter:
+  query: |-
+    {
+      album_by_id(id: "2") {
+        first {
+          position
+          name
+        }
+      }
+    }
+  response: |-
+    {:data {:album_by_id {:first {:position 1 :name "Asylum"}}}}

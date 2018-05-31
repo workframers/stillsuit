@@ -96,14 +96,17 @@
   can be passed to (execute-query) for further testing."
   ([db-name resolver-map]
    (load-setup db-name resolver-map nil))
-  ([db-name resolver-map overrides]
+  ([db-name resolver-map filters]
+   (load-setup db-name resolver-map filters nil))
+  ([db-name resolver-map filters overrides]
    (let [config    (get-config db-name)
          schema    (get-schema db-name)
          queries   (get-query-doc db-name)
-         decorated (stillsuit/decorate #:stillsuit{:schema     schema
-                                                   :config     config
-                                                   :connection (get-connection db-name)
-                                                   :resolvers  resolver-map})]
+         decorated (stillsuit/decorate #:stillsuit{:schema         schema
+                                                   :config         config
+                                                   :entity-filters filters
+                                                   :connection     (get-connection db-name)
+                                                   :resolvers      resolver-map})]
      (util/deep-map-merge {::context   (:stillsuit/app-context decorated)
                            ::config    config
                            ::schema    (:stillsuit/schema decorated)
