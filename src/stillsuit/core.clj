@@ -27,12 +27,13 @@
 
 (defn- make-app-context
   "Return an app-context map suitable for handing to (lacinia/execute-query)."
-  [base-context schema connection enum-map config]
+  [base-context schema connection enum-map entity-filters config]
   (let [context-conn (or connection (datomic-connect (or (:catchpocket/datomic-uri config)
                                                          (:stillsuit/datomic-uri schema))))]
-    (merge {:stillsuit/connection context-conn
-            :stillsuit/enum-map   enum-map
-            :stillsuit/config     config}
+    (merge {:stillsuit/connection     context-conn
+            :stillsuit/enum-map       enum-map
+            :stillsuit/config         config
+            :stillsuit/entity-filters entity-filters}
            base-context)))
 
 (defn- decorate-resolver-map
@@ -110,6 +111,8 @@
   - `:stillsuit/transformers` (optional): a map of keywords to scalar transformer function objects,
     identical to the map you'd pass to
     [`(lacinia.util/attach-scalar-transformers)`](http://lacinia.readthedocs.io/en/latest/custom-scalars.html#attaching-scalar-transformers).
+  - `:stillsuit/entity-filters` (optional): a map of keywords to entity filter functions, which are
+    used to filter the results of :stillsuit/ref resolvers.
 
   The return value of this function is a map with two keys:
 
@@ -120,7 +123,7 @@
   simple wrapper function [[execute]] that will invoke lacinia for you.
 
   For more information, see [the user manual](http://docs.workframe.com/stillsuit/current/manual/)."
-  [{:stillsuit/keys [schema config resolvers transformers context connection]}]
+  [{:stillsuit/keys [schema config resolvers transformers context connection entity-filters]}]
   (let [opts         (merge @default-config-schema (:stillsuit/config schema) config)
         uncompiled   (-> @base-schema
                          (slu/deep-map-merge schema)
@@ -137,7 +140,8 @@
     (when (:stillsuit/trace? opts)
       (log/spy :trace uncompiled))
     {:stillsuit/schema      compiled
-     :stillsuit/app-context (make-app-context context schema connection enum-map opts)}))
+     :stillsuit/app-context (make-app-context context schema connection
+                                              enum-map entity-filters opts)}))
 
 (defn execute
   "Convenience function to take the result of [[decorate]] and execute a query against it.
