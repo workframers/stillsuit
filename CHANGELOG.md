@@ -4,6 +4,7 @@
 ### Added
 
 - Lots of docs updates, `(stillsuit/connection)` and friends
+- Entity filters for ref resolvers
 
 ## [0.3.0] - 2018-02-14 💝
 ### Added

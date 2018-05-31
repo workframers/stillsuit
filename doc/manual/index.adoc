@@ -315,6 +315,18 @@ NOTE: These two fields are fine for simple fields whose sort order you know ahea
 but if you need more complex behavior, including pagination, you'll probably want to write
 a custom resolver.
 
+==== :stillsuit/entity-filter
+
+This option references an entity filter for the attribute - see below.
+
+== Entity Filters
+
+Entity filters allow you to attach a filter to any field in order to limit the set of
+entities that are returned from a given field resolver. The filter has access to the
+application context as well as the entity, so it can be used as a security measure.
+
+(More docs TBD)
+
 == Writing Query Resolvers
 
 In stillsuit we use the term "query resolver" to refer to a lacinia resolver that returns one or more

@@ -46,7 +46,7 @@ jobs:
           path: target/manual
   doc-deploy:
     <<: *docker_defaults
-    working_directory: ~/project/docs
+    working_directory: ~/project/doc
     steps:
       - checkout
       - <<: *restore_anchor

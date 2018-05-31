@@ -26,9 +26,15 @@
              (map (partial d/entity db))
              (sort-by :artist/name))))
 
+(defn first-track-filter [opts context entity]
+  (= (:track/position entity) 1))
+
 (def music-resolver-map
   {:query/artist-by-id get-artist-by-id
    :query/all-artists  get-all-artists})
 
+(def filters
+  {:music-filter/first-track first-track-filter})
+
 (deftest test-music-queries
-  (fixtures/verify-queries! (fixtures/load-setup :music music-resolver-map)))
+  (fixtures/verify-queries! (fixtures/load-setup :music music-resolver-map filters)))

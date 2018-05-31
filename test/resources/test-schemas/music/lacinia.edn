@@ -4,7 +4,7 @@
   {:description "Artist"
    :fields      {:id     {:type (non-null ID)}
                  :name   {:type (non-null String)}
-                 :albums {:type (list (non-null :Album))
+                 :albums {:type    (list (non-null :Album))
                           ;; This resolver factory tells stillsuit to resolve `albums` using
                           ;; the datomic attribute `:artist/albums`, and to sort the resulting
                           ;; set by the `album/year` attribute of the referred entities
@@ -23,6 +23,14 @@
                  ;; :album/tracks from the type and field name.
                  :tracks {:type (list (non-null :Track))}
 
+                 ;; This reference uses an entity filter that only returns the first track.
+                 :first  {:type    :Track
+                          :resolve [:stillsuit/ref
+                                    #:stillsuit{:attribute     :album/tracks
+                                                :lacinia-type  :Track
+                                                :cardinality   :stillsuit.cardinality/one
+                                                :entity-filter :music-filter/first-track}]}
+
                  ;; This resolver factory tells stillsuit to use the `:artist/_albums`
                  ;; backreference to go from an album to its artist. The `:stillsuit/cardinality`
                  ;; key with value :stillsuit.cardinality/one tells stillsuit to return a single
@@ -35,8 +43,9 @@
 
   :Track
   {:description "Track"
-   :fields      {:id   {:type (non-null ID)}
-                 :name {:type (non-null String)}}}}
+   :fields      {:id       {:type (non-null ID)}
+                 :position {:type (non-null Int)}
+                 :name     {:type (non-null String)}}}}
 
  :queries
  {:artist_by_id

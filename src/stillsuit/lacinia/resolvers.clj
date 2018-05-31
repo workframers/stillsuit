@@ -56,25 +56,23 @@
   "Based on the stillsuit options for a given ref field, ensure that it is either a
   single entity (for :stillsuit.cardinality/one) or a list of entities
   (for :stillsuit.cardinality/many)."
-  (fn [_ opts] (:stillsuit/cardinality opts)))
+  (fn [opts multiple? _]
+    (or (:stillsuit/cardinality opts)
+        (if multiple?
+          :stillsuit.cardinality/many
+          :stillsuit.cardinality/one))))
 
-(defmethod ensure-cardinality nil [value opts]
-  (if (set? value)
-    [(entity-sort opts value) nil]
-    [value nil]))
+(defmethod ensure-cardinality :stillsuit.cardinality/many [_ _ entities]
+  [entities nil])
 
-(defmethod ensure-cardinality :stillsuit.cardinality/many [value opts]
-  (cond
-    (nil? value) [[] nil]
-    (set? value) [(entity-sort opts value) nil]
-    :else [[]
-           {:message (format "Expected many results resolving attribute %s, but found: %s"
-                             (:stillsuit/attribute opts) value)}]))
-
-(defmethod ensure-cardinality :stillsuit.cardinality/one [value opts]
-  (if (set? value)
-    (ensure-single opts value)
-    [value nil]))
+(defmethod ensure-cardinality :stillsuit.cardinality/one [opts _ entities]
+  (if (> (count entities) 1)
+    [nil {:message (format "Expected a single %s result resolving attribute %s, but found %d results!"
+                           (:stillsuit/lacinia-type opts)
+                           (:stillsuit/attribute opts)
+                           (count entities))}]
+    ;; Else one or zero entities
+    [(first entities) nil]))
 
 (defmulti ^:private ensure-type
   "Coerce the given datomic primitive value to be the same as the given lacinia type.
@@ -83,14 +81,33 @@
 (defmethod ensure-type :default [value _] value)
 (defmethod ensure-type 'Boolean [value _] (true? value))
 
+(defn- sort-and-filter-entities
+  "Given an app context and the option map to a ref resolver, and a set of entities
+  representing the value or values to return from the resolver, check the option map
+  for filtering and sorting options. Return a seq of filtered and sorted entities."
+  [{:stillsuit/keys [entity-filter] :as opts} context entity-set]
+  (let [referenced-filter (get-in context [:stillsuit/entity-filters entity-filter])
+        filter-fn         (if-not (fn? referenced-filter)
+                            (do
+                              (when entity-filter
+                                (log/warnf "Referenced entity-filter %s not found!" entity-filter))
+                              (constantly true))
+                            referenced-filter)]
+    (->> entity-set
+         (filter (partial filter-fn opts context))
+         (entity-sort opts))))
+
 (defn ref-resolver
   "Resolver used to get a literal attribute value out of an entity, eg in
-  :resolve [:stillsuit/attribute {:stillsuit/attribute :artist/_country}]"
+  :resolve [:stillsuit/ref {:stillsuit/attribute :artist/_country}]"
   [{:stillsuit/keys [attribute lacinia-type] :as opts}]
   ^resolve/ResolverResult
   (fn [context args entity]
-    (let [value (ensure-type (get entity attribute) lacinia-type)
-          [sorted errs] (ensure-cardinality value opts)]
+    (let [value    (ensure-type (get entity attribute) lacinia-type)
+          val-set? (set? value)
+          val-list (if val-set? value #{value})
+          filtered (sort-and-filter-entities opts context val-list)
+          [sorted errs] (ensure-cardinality opts val-set? filtered)]
       (resolve/resolve-as
        (schema/tag-with-type sorted lacinia-type)
        errs))))
