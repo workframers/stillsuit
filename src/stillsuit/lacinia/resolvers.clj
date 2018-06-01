@@ -94,6 +94,7 @@
                               (constantly true))
                             referenced-filter)]
     (->> entity-set
+         (remove nil?)
          (filter (partial filter-fn opts context))
          (entity-sort opts))))
 
