@@ -64,7 +64,7 @@
   [app-context lacinia-type lacinia-enum-keyword]
   (let [value (get-in app-context [:stillsuit/enum-map lacinia-type :stillsuit/lacinia-to-datomic lacinia-enum-keyword])]
     (when (nil? value)
-      (log/warnf "Unable to find datomic enum equivalent for lacinia enum value %s!" lacinia-enum-keyword))
+      (log/infof "Unable to find datomic enum equivalent for lacinia enum value %s!" lacinia-enum-keyword))
     value))
 
 (defn connection
