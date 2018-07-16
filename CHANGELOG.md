@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.0] - 2018-05-24
+### Added
+
+- Updated dependencies
+- Added datomic-free in a profile to allow stuff to work in FLOSS environments
+- Tweaked some deployment stuff
+
 ## [0.10.0] - 2018-05-24
 ### Added
 
