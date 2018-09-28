@@ -1,6 +1,7 @@
-(defproject com.workframe/stillsuit "0.13.0"
+(defproject com.workframe/stillsuit "0.13.0-SNAPSHOT"
   :description "lacinia-datomic interface library"
   :url "https://github.com/workframers/stillsuit"
+  :scm {:name "git" :url "https://github.com/workframers/stillsuit"}
   :pedantic? :warn
   :min-lein-version "2.8.1"
   :license {:name "Apache 2.0"
