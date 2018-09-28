@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.14.0] - 2018-05-24
+## [0.13.0] - 2018-09-28
 ### Added
 
 - Updated dependencies

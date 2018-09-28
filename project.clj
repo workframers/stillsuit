@@ -19,7 +19,11 @@
                  [org.clojure/data.json "0.2.6"]
                  [clojure.java-time "0.3.2"]
                  [org.clojure/tools.logging "0.4.1"]
-                 [org.clojure/tools.reader "1.3.0"]]
+                 [org.clojure/tools.reader "1.3.0"]
+                 [com.datomic/datomic-free "0.9.5697"
+                  :optional true
+                  :scope "provided"
+                  :exclusions [org.slf4j/slf4j-nop]]]
 
   :source-paths ["src"]
 
