@@ -29,7 +29,7 @@ jobs:
     steps:
       - checkout
       - <<: *restore_anchor
-      - run: lein with-profile +test cloverage -s test --junit
+      - run: lein with-profile +test,+free cloverage -s test --junit
       - store_test_results:
           path: target/coverage
       - store_artifacts:
@@ -39,10 +39,11 @@ jobs:
     steps:
       - checkout
       - <<: *restore_anchor
-      - run: lein with-profile +docs codox
-      - run: lein with-profile +docs asciidoctor
+      - run: lein with-profile +docs,+free codox
       - store_artifacts:
           path: target/doc
+      - run: lein with-profile +docs,+free asciidoctor
+      - store_artifacts:
           path: target/manual
   doc-deploy:
     <<: *docker_defaults
@@ -63,7 +64,7 @@ jobs:
           command: lein install
       - deploy:
           name: Deploy to S3
-          command: lein deploy workframe-private
+          command: lein with-profile +workframe deploy workframe-private
 
 workflows:
   version: 2
