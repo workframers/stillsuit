@@ -1,7 +1,8 @@
 (ns stillsuit.datomic.core
   "Implementation functions for dealing with datomic interactions."
   (:require [datomic.api :as d]
-            [clojure.tools.logging :as log])
+            [clojure.tools.logging :as log]
+            [clojure.core.cache :as cache])
   (:import (java.util UUID)))
 
 (defn entity? [thing]
@@ -47,16 +48,29 @@
     ;; Else atttribute not found
     (log/warnf "Attribute %s not found in (get-entity-by-unique-attribute)" attribute-ident)))
 
-(defn guess-entity-ns
+(defonce recent-activity-cache (atom (cache/ttl-cache-factory {} :ttl 60000)))
+
+(defn do-cache-lookup [c cache-key f]
+  (if (cache/has? @c cache-key)
+    (do
+      (swap! c cache/hit cache-key)
+      (cache/lookup @c cache-key))
+    (let [value (f)]
+      (swap! c cache/miss cache-key value)
+      value)))
+
+(defn guess-entity-ns*
   "Given a random entity, iterate through its attributes and look for one that is marked
   as :db.unique/identity. Return the namespace of that attribute as a string."
   [entity]
   (when entity
     (let [db               (d/entity-db entity)
           unique           (fn [attr-kw]
-                             (let [attr-ent (d/entity db attr-kw)]
-                               (when (some? (:db/unique attr-ent))
-                                 attr-kw)))
+                             (do-cache-lookup recent-activity-cache attr-kw
+                                              (fn [attr-kw]
+                                                (let [attr-ent (d/entity db attr-kw)]
+                                                  (when (some? (:db/unique attr-ent))
+                                                    attr-kw)))))
           unique-attribute (some->> entity
                                     keys
                                     (remove #(= (namespace %) "db"))
