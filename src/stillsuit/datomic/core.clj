@@ -1,7 +1,8 @@
 (ns stillsuit.datomic.core
   "Implementation functions for dealing with datomic interactions."
   (:require [datomic.api :as d]
-            [clojure.tools.logging :as log])
+            [clojure.tools.logging :as log]
+            [clojure.string :as string])
   (:import (java.util UUID)))
 
 (defn entity? [thing]
@@ -44,25 +45,40 @@
       ;; Else coercion failed
       (log/warnf "Unable to coerce input '%s' to type %s in (get-entity-by-unique-attribute %s)"
                  value (:db/valueType attr-ent) attribute-ident))
-    ;; Else atttribute not found
+    ;; Else attribute not found
     (log/warnf "Attribute %s not found in (get-entity-by-unique-attribute)" attribute-ident)))
+
+(defn identity-attributes
+  "Return a seq of the attributes for a given entity which are unique"
+  [entity]
+  (let [db (d/entity-db entity)]
+    (d/q '[:find [?id ...]
+           :in $ ?e
+           :where
+           [?e ?a]
+           [?a :db/unique :db.unique/identity]
+           [(not= ?a :db/id)]
+           [(datomic.api/attribute $ ?a) ?attr]
+           [(:ident ?attr) ?id]]
+         db (:db/id entity))))
 
 (defn guess-entity-ns
   "Given a random entity, iterate through its attributes and look for one that is marked
   as :db.unique/identity. Return the namespace of that attribute as a string."
   [entity]
   (when entity
-    (let [db               (d/entity-db entity)
-          unique           (fn [attr-kw]
-                             (let [attr-ent (d/entity db attr-kw)]
-                               (when (some? (:db/unique attr-ent))
-                                 attr-kw)))
-          unique-attribute (some->> entity
-                                    keys
-                                    (remove #(= (namespace %) "db"))
-                                    (some unique))]
-      (if (some? unique-attribute)
-        (namespace unique-attribute)
+    (let [attrs (identity-attributes entity)
+          nses  (->> attrs (map namespace) distinct)]
+      (cond
+        (empty? nses)
         (do (log/warnf "Could not find unique attribute for:\n%s\nField resolution probably won't work!!"
                        (d/touch entity))
-            nil)))))
+            nil)
+
+        (not= (count nses) 1)
+        (do (log/warnf "Found nultiple unique namespaces '%s' in entity:\n%s\nField resolution probably won't work!!"
+                       (string/join ", " nses) (d/touch entity))
+            nil)
+
+        :else
+        (first attrs)))))
