@@ -43,6 +43,7 @@
                                         [com.jakemccrary/lein-test-refresh "0.23.0"]]
                          :dependencies [[vvvvalvalval/datomock "0.2.2"]
                                         [io.forward/yaml "1.0.9"]
+                                        [criterium "0.4.4"]
                                         [org.apache.logging.log4j/log4j-core "2.11.1"]
                                         [org.apache.logging.log4j/log4j-slf4j-impl "2.11.1"]]}
              :free      {:dependencies [[com.datomic/datomic-free "0.9.5697"

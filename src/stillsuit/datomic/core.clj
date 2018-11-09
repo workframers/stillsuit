@@ -76,9 +76,11 @@
             nil)
 
         (not= (count nses) 1)
-        (do (log/warnf "Found nultiple unique namespaces '%s' in entity:\n%s\nField resolution probably won't work!!"
-                       (string/join ", " nses) (d/touch entity))
-            nil)
+        (let [chosen (-> nses sort first)]
+          (log/warnf (str "Found multiple unique namespaces '%s' in entity:\n%s\n"
+                         "Using %s, but field resolution may be incorrect!")
+                    (string/join ", " nses) (d/touch entity) chosen)
+          chosen)
 
         :else
         (first nses)))))
