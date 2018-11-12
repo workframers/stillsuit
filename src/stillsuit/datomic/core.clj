@@ -78,9 +78,27 @@
         (not= (count nses) 1)
         (let [chosen (-> nses sort first)]
           (log/warnf (str "Found multiple unique namespaces '%s' in entity:\n%s\n"
-                         "Using %s, but field resolution may be incorrect!")
-                    (string/join ", " nses) (d/touch entity) chosen)
+                          "Using %s, but field resolution may be incorrect!")
+                     (string/join ", " nses) (d/touch entity) chosen)
           chosen)
 
         :else
         (first nses)))))
+
+(defn guess-entity-ns-old
+  "Given a random entity, iterate through its attributes and look for one that is marked
+  as :db.unique/identity. Return the namespace of that attribute as a string."
+  [entity]
+  (when entity
+    (let [db               (d/entity-db entity)
+          unique           (fn [attr-kw]
+                             (let [attr-ent (d/entity db attr-kw)]
+                               (when (some? (:db/unique attr-ent))
+                                 attr-kw)))
+          unique-attribute (some->> entity
+                                    keys
+                                    (remove #(= (namespace %) "db"))
+                                    (some unique))]
+      (if (some? unique-attribute)
+        (namespace unique-attribute)
+        nil))))
