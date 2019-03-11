@@ -105,7 +105,9 @@
   ^resolve/ResolverResult
   (fn [context args entity]
     (let [value     (ensure-type (get entity attribute) lacinia-type)
-          val-coll? (coll? value)
+          val-coll? (and (coll? value)
+                         (not (map? value))
+                         (not (sd/entity? value)))
           val-list  (if val-coll? (set value) #{value})
           filtered  (sort-and-filter-entities opts context val-list)
           [sorted errs] (ensure-cardinality opts val-coll? filtered)]
