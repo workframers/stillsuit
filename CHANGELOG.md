@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.15.0] - 2018-03-12
+### Added
+
+- Updated to latest lacinia
+- Some bugfixes around cardinality-many attributes and enums
+
 ## [0.14.0] - 2018-09-28
 ### Added
 
