@@ -7,7 +7,7 @@
   :license {:name "Apache 2.0"
             :url  "https://www.apache.org/licenses/LICENSE-2.0"}
 
-  :dependencies [[org.clojure/clojure "1.9.0" :scope "provided"]
+  :dependencies [[org.clojure/clojure "1.10.0" :scope "provided"]
                  [org.clojure/tools.cli "0.4.1"]
                  [mvxcvi/puget "1.1.0"]
                  [fipp "0.6.17"]
@@ -16,6 +16,7 @@
                  [com.walmartlabs/lacinia "0.32.0"]
                  [clojure.java-time "0.3.2"]
                  [org.clojure/tools.logging "0.4.1"]
+                 [org.clojure/tools.reader "1.3.2"]
                  [com.datomic/datomic-free "0.9.5697"
                   :optional true
                   :scope "provided"
