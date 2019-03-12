@@ -43,7 +43,7 @@ and stillsuit handles graph traversal and field lookup for you.
 Add this to project.clj, build.boot, or deps.edn:
 
 ```
-[com.workframe/stillsuit "0.6.0"]
+[com.workframe/stillsuit "0.15.0"]
 ```
 
 Note that stillsuit assumes that you have the datomic peer libraries in
