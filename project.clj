@@ -7,19 +7,16 @@
   :license {:name "Apache 2.0"
             :url  "https://www.apache.org/licenses/LICENSE-2.0"}
 
-  :dependencies [[org.clojure/clojure "1.9.0"]
-                 [org.clojure/core.async "0.4.474"]
+  :dependencies [[org.clojure/clojure "1.10.0" :scope "provided"]
                  [org.clojure/tools.cli "0.4.1"]
-                 [mvxcvi/puget "1.0.2"]
-                 [fipp "0.6.12"]
-                 [funcool/cuerdas "2.0.6"]
-                 [io.aviso/pretty "0.1.34"]
-                 [com.walmartlabs/lacinia "0.29.0"]
-                 ;; why the below isn't transitively picked up from lacinia is a mystery to me
-                 [org.clojure/data.json "0.2.6"]
+                 [mvxcvi/puget "1.1.0"]
+                 [fipp "0.6.17"]
+                 [funcool/cuerdas "2.1.0"]
+                 [io.aviso/pretty "0.1.37"]
+                 [com.walmartlabs/lacinia "0.32.0"]
                  [clojure.java-time "0.3.2"]
                  [org.clojure/tools.logging "0.4.1"]
-                 [org.clojure/tools.reader "1.3.0"]
+                 [org.clojure/tools.reader "1.3.2"]
                  [com.datomic/datomic-free "0.9.5697"
                   :optional true
                   :scope "provided"
@@ -38,20 +35,20 @@
                  :source-highlight true
                  :to-dir           "target/manual"}]
 
-  :profiles {:dev       {:plugins      [[lein-cloverage "1.0.13" :exclusions [org.clojure/clojure]]
+  :profiles {:dev       {:plugins      [[lein-cloverage "1.1.1" :exclusions [org.clojure/clojure]]
                                         [lein-shell "0.5.0"]
                                         [com.jakemccrary/lein-test-refresh "0.23.0"]]
                          :dependencies [[vvvvalvalval/datomock "0.2.2"]
                                         [io.forward/yaml "1.0.9"]
-                                        [org.apache.logging.log4j/log4j-core "2.11.1"]
-                                        [org.apache.logging.log4j/log4j-slf4j-impl "2.11.1"]]}
+                                        [org.apache.logging.log4j/log4j-core "2.11.2"]
+                                        [org.apache.logging.log4j/log4j-slf4j-impl "2.11.2"]]}
              :free      {:dependencies [[com.datomic/datomic-free "0.9.5697"
                                          :exclusions [org.slf4j/slf4j-nop]]]}
-             :docs      {:plugins      [[lein-codox "0.10.4"]
-                                        [lein-asciidoctor "0.1.16" :exclusions [org.slf4j/slf4j-api]]]
+             :docs      {:plugins      [[lein-codox "0.10.6"]
+                                        [lein-asciidoctor "0.1.17" :exclusions [org.slf4j/slf4j-api]]]
                          :dependencies [[codox-theme-rdash "0.1.2"]]}
              :ancient   {:plugins [[lein-ancient "0.6.15"]]}
-             :ultra     {:plugins [[venantius/ultra "0.5.2" :exclusions [org.clojure/clojure]]]}
+             :ultra     {:plugins [[venantius/ultra "0.6.0" :exclusions [org.clojure/clojure]]]}
              :test      {:resource-paths ["test/resources"]}
              :workframe {:plugins      [[s3-wagon-private "1.3.2" :exclusions [commons-logging]]]
                          :repositories [["workframe-private"
