@@ -14,7 +14,7 @@
                  [fipp "0.6.12"]
                  [funcool/cuerdas "2.0.6"]
                  [io.aviso/pretty "0.1.34"]
-                 [com.walmartlabs/lacinia "0.29.0"]
+                 [com.walmartlabs/lacinia "0.32.0"]
                  ;; why the below isn't transitively picked up from lacinia is a mystery to me
                  [org.clojure/data.json "0.2.6"]
                  [clojure.java-time "0.3.2"]
