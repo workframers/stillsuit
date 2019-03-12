@@ -130,7 +130,8 @@
         (log/warnf "Unable to find mapping for datomic enum value %s for type %s, attribute %s!"
                    value lacinia-type attribute))
       (resolve/resolve-as
-       (schema/tag-with-type (or mapped value) lacinia-type)))))
+       (when (or (some? mapped) (some? value))
+         (schema/tag-with-type (or mapped value) lacinia-type))))))
 
 (defn datomic-entity-interface
   [config]
