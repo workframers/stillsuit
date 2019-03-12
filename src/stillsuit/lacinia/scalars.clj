@@ -60,11 +60,6 @@
   [^String u]
   (UUID/fromString u))
 
-(defn parse-as-value
-  [type-convert]
-  ;(schema/as-conformer
-  (fn [^String k] (type-convert k)))
-
 (defn- strip-leading-colons
   [s]
   (str/replace s #"^:+" ""))
