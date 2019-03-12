@@ -1,4 +1,4 @@
-(defproject com.workframe/stillsuit "0.15.0-SNAPSHOT"
+(defproject com.workframe/stillsuit "0.15.0"
   :description "lacinia-datomic interface library"
   :url "https://github.com/workframers/stillsuit"
   :scm {:name "git" :url "https://github.com/workframers/stillsuit"}
