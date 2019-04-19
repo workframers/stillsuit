@@ -76,10 +76,10 @@
 
 (defmulti ^:private ensure-type
   "Coerce the given datomic primitive value to be the same as the given lacinia type.
-  Currently this just converts `nil` values to `false` for Boolean fields."
+  Currently this just converts `nil` values to `false` for non-null Boolean fields."
   (fn [value lacinia-type] lacinia-type))
 (defmethod ensure-type :default [value _] value)
-(defmethod ensure-type 'Boolean [value _] (true? value))
+(defmethod ensure-type '(non-null Boolean) [value _] (true? value))
 
 (defn- sort-and-filter-entities
   "Given an app context and the option map to a ref resolver, and a set of entities
