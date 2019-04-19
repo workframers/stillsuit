@@ -30,7 +30,7 @@
                  :twoBoolean {:type    (non-null Boolean)
                               :resolve [:stillsuit/ref
                                         #:stillsuit{:attribute    :rainbow/two-boolean
-                                                    :lacinia-type Boolean}]}
+                                                    :lacinia-type (non-null Boolean)}]}
                  :oneLong    {:type :JavaLong}
                  :oneBigint  {:type :JavaBigInt}
                  :oneFloat   {:type Float}
