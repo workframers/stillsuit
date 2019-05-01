@@ -6,7 +6,8 @@
             [cuerdas.core :as str]
             [datomic.api :as d]
             [stillsuit.datomic.core :as datomic]
-            [com.walmartlabs.lacinia.schema :as schema]))
+            [com.walmartlabs.lacinia.schema :as schema]
+            [taoensso.tufte :as tufte]))
 
 (defn graphql-field->datomic-attribute
   "Given a datomic entity and a field name from GraphQL, try to look up the field name in
@@ -104,16 +105,17 @@
   [{:stillsuit/keys [attribute lacinia-type] :as opts}]
   ^resolve/ResolverResult
   (fn [context args entity]
-    (let [value     (ensure-type (get entity attribute) lacinia-type)
-          val-coll? (and (coll? value)
-                         (not (map? value))
-                         (not (sd/entity? value)))
-          val-list  (if val-coll? (set value) #{value})
-          filtered  (sort-and-filter-entities opts context val-list)
-          [sorted errs] (ensure-cardinality opts val-coll? filtered)]
-      (resolve/resolve-as
-       (schema/tag-with-type sorted lacinia-type)
-       errs))))
+    (tufte/p :stillsuit/ref-resolver
+      (let [value     (ensure-type (get entity attribute) lacinia-type)
+            val-coll? (and (coll? value)
+                           (not (map? value))
+                           (not (sd/entity? value)))
+            val-list  (if val-coll? (set value) #{value})
+            filtered  (tufte/p :ref-sort (sort-and-filter-entities opts context val-list))
+            [sorted errs] (tufte/p :ref-cardinality (ensure-cardinality opts val-coll? filtered))]
+        (resolve/resolve-as
+         (schema/tag-with-type sorted lacinia-type)
+         errs)))))
 
 (defn enum-resolver
   "Resolver used to get an attribute value for a lacinia enum type. This uses the :stillsuit/enum-map
@@ -121,17 +123,18 @@
   [{:stillsuit/keys [attribute lacinia-type] :as opts}]
   ^resolve/ResolverResult
   (fn [context args entity]
-    (let [value    (get entity attribute)
-          attr-map (get-in context [:stillsuit/enum-map lacinia-type :stillsuit/datomic-to-lacinia])
-          mapped   (if (set? value)
-                     (map #(get attr-map %) value)
-                     (get attr-map value))]
-      (when (and (some? value) (nil? mapped))
-        (log/warnf "Unable to find mapping for datomic enum value %s for type %s, attribute %s!"
-                   value lacinia-type attribute))
-      (resolve/resolve-as
-       (when (or (some? mapped) (some? value))
-         (schema/tag-with-type (or mapped value) lacinia-type))))))
+    (tufte/p :stillsuit/enum-resolver
+             (let [value    (get entity attribute)
+                   attr-map (get-in context [:stillsuit/enum-map lacinia-type :stillsuit/datomic-to-lacinia])
+                   mapped   (if (set? value)
+                              (map #(get attr-map %) value)
+                              (get attr-map value))]
+               (when (and (some? value) (nil? mapped))
+                 (log/warnf "Unable to find mapping for datomic enum value %s for type %s, attribute %s!"
+                            value lacinia-type attribute))
+               (resolve/resolve-as
+                (when (or (some? mapped) (some? value))
+                  (schema/tag-with-type (or mapped value) lacinia-type)))))))
 
 (defn datomic-entity-interface
   [config]
@@ -149,10 +152,11 @@
   [field-name]
   ^resolve/ResolverResult
   (fn [{:keys [:stillsuit/config]} args value]
-    (resolve/resolve-as
-     (if (sd/entity? value)
-       (get-graphql-value value field-name config)
-       (get value field-name)))))
+    (tufte/p :stillsuit/default-resolver
+             (resolve/resolve-as
+              (if (sd/entity? value)
+                (get-graphql-value value field-name config)
+                (get value field-name))))))
 
 (defn resolver-map [config]
   {:stillsuit/ref  ref-resolver

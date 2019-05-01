@@ -1,4 +1,4 @@
-(defproject com.workframe/stillsuit "0.15.0"
+(defproject com.workframe/stillsuit "0.16.0-SNAPSHOT"
   :description "lacinia-datomic interface library"
   :url "https://github.com/workframers/stillsuit"
   :scm {:name "git" :url "https://github.com/workframers/stillsuit"}
@@ -17,6 +17,8 @@
                  [clojure.java-time "0.3.2"]
                  [org.clojure/tools.logging "0.4.1"]
                  [org.clojure/tools.reader "1.3.2"]
+                 [com.taoensso/tufte "2.0.1"]
+
                  [com.datomic/datomic-free "0.9.5697"
                   :optional true
                   :scope "provided"
