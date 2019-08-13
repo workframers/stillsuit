@@ -7,15 +7,15 @@
   :license {:name "Apache 2.0"
             :url  "https://www.apache.org/licenses/LICENSE-2.0"}
 
-  :dependencies [[org.clojure/clojure "1.10.0" :scope "provided"]
-                 [org.clojure/tools.cli "0.4.1"]
-                 [mvxcvi/puget "1.1.0"]
-                 [fipp "0.6.17"]
-                 [funcool/cuerdas "2.1.0"]
+  :dependencies [[org.clojure/clojure "1.10.1" :scope "provided"]
+                 [org.clojure/tools.cli "0.4.2"]
+                 [mvxcvi/puget "1.1.2"]
+                 [fipp "0.6.18"]
+                 [funcool/cuerdas "2.2.0" :exclusions [org.clojure/clojurescript]]
                  [io.aviso/pretty "0.1.37"]
-                 [com.walmartlabs/lacinia "0.32.0"]
+                 [com.walmartlabs/lacinia "0.33.0"]
                  [clojure.java-time "0.3.2"]
-                 [org.clojure/tools.logging "0.4.1"]
+                 [org.clojure/tools.logging "0.5.0"]
                  [org.clojure/tools.reader "1.3.2"]
                  [com.datomic/datomic-free "0.9.5697"
                   :optional true
@@ -40,8 +40,8 @@
                                         [com.jakemccrary/lein-test-refresh "0.23.0"]]
                          :dependencies [[vvvvalvalval/datomock "0.2.2"]
                                         [io.forward/yaml "1.0.9"]
-                                        [org.apache.logging.log4j/log4j-core "2.11.2"]
-                                        [org.apache.logging.log4j/log4j-slf4j-impl "2.11.2"]]}
+                                        [org.apache.logging.log4j/log4j-core "2.12.1"]
+                                        [org.apache.logging.log4j/log4j-slf4j-impl "2.12.1"]]}
              :free      {:dependencies [[com.datomic/datomic-free "0.9.5697"
                                          :exclusions [org.slf4j/slf4j-nop]]]}
              :docs      {:plugins      [[lein-codox "0.10.6"]
