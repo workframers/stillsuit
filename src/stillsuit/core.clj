@@ -62,10 +62,12 @@
 
   For more information, see [the user manual](http://docs.workframe.com/stillsuit/current/manual/#_stillsuit_enums)."
   [app-context lacinia-type lacinia-enum-keyword]
-  (let [value (get-in app-context [:stillsuit/enum-map lacinia-type :stillsuit/lacinia-to-datomic lacinia-enum-keyword])]
-    (when (nil? value)
-      (log/infof "Unable to find datomic enum equivalent for lacinia enum value %s!" lacinia-enum-keyword))
-    value))
+  (get-in app-context [:stillsuit/enum-map lacinia-type :stillsuit/lacinia-to-datomic lacinia-enum-keyword]))
+
+(defn lacinia-enum
+  "Reverse of datomic-enum above"
+  [context lacinia-type datomic-keyword]
+  (get-in context [:stillsuit/enum-map lacinia-type :stillsuit/datomic-to-lacinia datomic-keyword]))
 
 (defn connection
   "Given a stillsuit-decorated app context, return the datomic connection object that was associated with the
