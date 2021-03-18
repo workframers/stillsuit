@@ -9,6 +9,10 @@
   {:description "A Java BigDecimal value, serialized as a string."
    :parse       :stillsuit.parse/bigdec
    :serialize   :stillsuit.serialize/str}
+  :ID
+  {:description "Override lacinia's strict ID serializer"
+   :parse       :stillsuit.serialize/str
+   :serialize   :stillsuit.serialize/str}
   :JavaBigInt
   {:description "A Java BigInteger value, serialized as a string."
    :parse       :stillsuit.parse/bigint
