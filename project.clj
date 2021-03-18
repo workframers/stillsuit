@@ -13,7 +13,7 @@
                  [fipp "0.6.17"]
                  [funcool/cuerdas "2.1.0"]
                  [io.aviso/pretty "0.1.37"]
-                 [com.walmartlabs/lacinia "0.32.0"]
+                 [com.walmartlabs/lacinia "0.38.0"]
                  [clojure.java-time "0.3.2"]
                  [org.clojure/tools.logging "0.4.1"]
                  [org.clojure/tools.reader "1.3.2"]
