@@ -125,7 +125,7 @@
   simple wrapper function [[execute]] that will invoke lacinia for you.
 
   For more information, see [the user manual](http://docs.workframe.com/stillsuit/current/manual/)."
-  [{:stillsuit/keys [schema config resolvers transformers context connection entity-filters]}]
+  [{:stillsuit/keys [schema config resolvers transformers context connection entity-filters compile-opts]}]
   (let [opts         (merge @default-config-schema (:stillsuit/config schema) config)
         uncompiled   (-> @base-schema
                          (slu/deep-map-merge schema)
@@ -133,8 +133,10 @@
                          (sr/attach-resolvers opts)
                          (util/attach-resolvers (decorate-resolver-map resolvers opts))
                          (util/attach-scalar-transformers (ss/transformer-map transformers opts)))
-        compile-opts (when-not (:stillsuit/no-default-resolver? opts)
-                       {:default-field-resolver sr/default-resolver})
+        compile-opts (merge
+                       compile-opts
+                       (when-not (:stillsuit/no-default-resolver? opts)
+                         {:default-field-resolver sr/default-resolver}))
         enum-map     (se/make-enum-map opts uncompiled)
         compiled     (if (:stillsuit/compile? opts)
                        (schema/compile uncompiled compile-opts)
